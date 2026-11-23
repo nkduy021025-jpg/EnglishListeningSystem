@@ -1,0 +1,222 @@
+﻿.listening-landing {
+    background: #f8f5ee;
+}
+
+.listening-landing .listening-nav {
+    padding-block: .9rem;
+    background: #f8f5ee;
+    border-bottom: 1px solid #e4ddd0;
+}
+
+.listening-landing .navbar-brand {
+    color: #19382f;
+    font-weight: 800;
+    letter-spacing: -.045em;
+    word-break: normal;
+}
+
+.listening-nav .btn {
+    border: 1px solid #a9b5a9;
+    color: #19382f;
+    border-radius: 2rem;
+    font-weight: 650;
+    padding-inline: 1.1rem;
+}
+
+.listening-nav .btn:hover {
+    background: #19382f;
+    color: white;
+}
+
+.listening-home {
+    color: #19382f;
+    margin-block: clamp(1.25rem, 4vw, 3rem) 2rem;
+}
+
+.listening-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(2rem, 5vw, 5rem);
+    padding: clamp(1.65rem, 5vw, 5rem);
+    border-radius: 1.75rem;
+    background: #142f28;
+    color: #fff8ea;
+}
+
+.listening-label {
+    margin: 0 0 1rem;
+    color: #ffbd8e;
+    font-size: .78rem;
+    font-weight: 750;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+}
+
+.listening-intro h1 {
+    margin: 0;
+    font-family: Georgia, serif;
+    font-size: clamp(2.45rem, 5.1vw, 5.2rem);
+    line-height: 1.08;
+    letter-spacing: -.06em;
+}
+
+.listening-intro h1 span {
+    color: #ffbd8e;
+}
+
+.listening-description {
+    max-width: 36rem;
+    margin: 1.35rem 0 1.75rem;
+    color: #d7e0d4;
+    font-size: clamp(1rem, 1.4vw, 1.16rem);
+    line-height: 1.7;
+}
+
+.listening-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .65rem 1.15rem;
+}
+
+.listening-primary,
+.listening-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: .55rem;
+    min-height: 2.8rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.listening-primary {
+    padding: .55rem 1.1rem;
+    border: 1px solid transparent;
+    border-radius: 2rem;
+    background: #ffbd8e;
+    color: #142f28;
+}
+
+.listening-primary:hover {
+    background: #ffdbbc;
+    color: #142f28;
+}
+
+.listening-secondary,
+.listening-secondary:hover {
+    color: #fff8ea;
+}
+
+.listening-secondary:hover {
+    text-decoration: underline;
+}
+
+.listening-actions :focus-visible {
+    outline: 2px solid #fff8ea;
+    outline-offset: 4px;
+}
+
+.listening-example {
+    margin: 0;
+    padding: clamp(1.25rem, 3vw, 2.25rem);
+    border: 1px solid #597369;
+    border-radius: 1.25rem;
+    background: radial-gradient(ellipse at top right, #385b4d, #203f35 70%);
+}
+
+.listening-wave {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 3px;
+    height: clamp(3rem, 7vw, 6rem);
+    margin-block: 1.55rem;
+}
+
+.listening-wave span {
+    width: min(3.1%, .52rem);
+    height: var(--bar-height);
+    border-radius: 1rem;
+    background: #ffbd8e;
+}
+
+.listening-example blockquote p {
+    margin: 0;
+    font-family: Georgia, serif;
+    font-size: clamp(1.45rem, 2.5vw, 2.25rem);
+    line-height: 1.15;
+}
+
+.listening-example blockquote {
+    margin: 0 0 .6rem;
+}
+
+.listening-translation {
+    margin: 0;
+    color: #d7e0d4;
+}
+
+.listening-guide {
+    margin-top: clamp(2rem, 5vw, 4rem);
+}
+
+.listening-guide h2 {
+    margin-bottom: 1.25rem;
+    font-family: Georgia, serif;
+    font-size: clamp(1.85rem, 3vw, 2.7rem);
+    letter-spacing: -.035em;
+}
+
+.listening-steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: listening-step;
+}
+
+.listening-steps li {
+    padding: 1.4rem;
+    border: 1px solid #e4ddd0;
+    border-radius: 1rem;
+    background: #fffcf6;
+    counter-increment: listening-step;
+}
+
+.listening-steps li::before {
+    display: grid;
+    place-items: center;
+    width: 2.3rem;
+    height: 2.3rem;
+    margin-bottom: .9rem;
+    border-radius: 50%;
+    background: #e4ece3;
+    font-weight: 750;
+    content: counter(listening-step);
+}
+
+.listening-steps h3 {
+    margin-bottom: .45rem;
+    font-size: 1.15rem;
+    font-weight: 750;
+}
+
+.listening-steps p {
+    margin: 0;
+    color: #465e53;
+    line-height: 1.6;
+}
+
+@media (max-width: 767.98px) {
+    .listening-hero,
+    .listening-steps {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .listening-hero {
+        border-radius: 1.2rem;
+    }
+}

@@ -1,0 +1,67 @@
+@model StudentLessonsViewModel
+
+@{
+    ViewData["Title"] = Model.CategoryName;
+    var sections = Model.Lessons.Chunk(20).ToArray();
+}
+
+<nav aria-label="Đường dẫn">
+    <ol class="breadcrumb student-breadcrumb">
+        <li class="breadcrumb-item"><a asp-action="Index">Chủ đề luyện nghe</a></li>
+        <li class="breadcrumb-item active" aria-current="page">@Model.CategoryName</li>
+    </ol>
+</nav>
+
+<div class="lesson-toolbar">
+    <h1 class="student-title">@Model.CategoryName</h1>
+    <form class="lesson-filters" asp-action="Baihoc" method="get" role="search">
+        <input type="hidden" name="id" value="@Model.CategoryId" />
+        <input class="form-control" type="search" name="search" value="@Model.Search"
+               placeholder="Tên bài học" aria-label="Tìm theo tên bài học" />
+        <select class="form-select" name="level" aria-label="Cấp độ">
+            <option value="">Mọi cấp độ</option>
+            @foreach (var level in Model.Levels)
+            {
+                <option value="@level" selected="@string.Equals(level, Model.Level, StringComparison.OrdinalIgnoreCase)">@level</option>
+            }
+        </select>
+        <button class="lesson-filter-button" type="submit">Lọc</button>
+    </form>
+</div>
+
+@if (sections.Length == 0)
+{
+    <p class="student-empty">
+        @(Model.Search.Length > 0 || Model.Level.Length > 0
+            ? "Không tìm thấy bài học phù hợp."
+            : "Danh mục này chưa có bài học.")
+    </p>
+}
+else
+{
+    @for (var index = 0; index < sections.Length; index++)
+    {
+        <details class="lesson-section" open="@(index == 0 ? "open" : null)">
+            <summary>
+                <strong>Phần @(index + 1)</strong>
+                <span>@sections[index].Length bài học</span>
+            </summary>
+            <ol class="lesson-grid" start="@(index * 20 + 1)">
+                @foreach (var lesson in sections[index])
+                {
+                    <li>
+                        <a class="lesson-link stretched-link" asp-action="LuyenNghe" asp-route-id="@lesson.Id">@lesson.Title</a>
+                        <div class="lesson-meta">@lesson.SentenceCount câu luyện nghe · Cấp độ @lesson.Level</div>
+                        @if (lesson.RatingCount > 0)
+                        {
+                            <span class="badge lesson-rating-badge mt-2" aria-label="@lesson.AverageRating.ToString("F1") trên 5 sao, @lesson.RatingCount lượt đánh giá">
+                                <i class="bi bi-star-fill text-warning" aria-hidden="true"></i>
+                                @lesson.AverageRating.ToString("F1") (@lesson.RatingCount)
+                            </span>
+                        }
+                    </li>
+                }
+            </ol>
+        </details>
+    }
+}

@@ -1,0 +1,45 @@
+@model IEnumerable<DanhMuc>
+
+@{
+    ViewData["Title"] = "Chủ đề luyện nghe";
+}
+
+<nav aria-label="Đường dẫn">
+    <ol class="breadcrumb student-breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Bài học</li>
+    </ol>
+</nav>
+
+<h1 class="student-title">Chủ đề luyện nghe</h1>
+
+@if (!Model.Any())
+{
+    <p class="student-empty">Chưa có chủ đề luyện nghe.</p>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-md-3 g-3">
+        @foreach (var topic in Model)
+        {
+            <div class="col">
+                <article class="card topic-card h-100">
+                    <div class="d-flex align-items-start gap-3">
+                        <span class="topic-icon" aria-hidden="true">🎧</span>
+                        <div class="topic-content">
+                            <h2 class="topic-heading">
+                                <a asp-controller="Student" asp-action="Baihoc" asp-route-id="@topic.MaDM" class="stretched-link">
+                                    @topic.TenDM
+                                </a>
+                            </h2>
+                            <p class="topic-description">
+                                @(string.IsNullOrWhiteSpace(topic.MoTa) ? "Luyện nghe tiếng Anh" : topic.MoTa)
+                            </p>
+                            <p class="topic-count">@topic.BaiHocs.Count bài học</p>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        }
+    </div>
+}

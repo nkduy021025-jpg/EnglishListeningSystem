@@ -1,0 +1,221 @@
+@using EnglishListeningSystem.Models.ViewModel
+@model IEnumerable<EnglishListeningSystem.Models.TaiKhoan>
+
+@{
+    Layout = "~/Views/Shared/_Layout_Admin.cshtml";
+    ViewData["Title"] = "Quản trị hệ thống";
+    var thongKeBaiHoc = (IReadOnlyList<ThongKeBaiHoc>)ViewBag.ThongKeBaiHoc;
+    var thongKeHocVien = new[]
+    {
+        (Nhan: "Tổng số học viên", GiaTri: (int)ViewBag.TongHocVien, Mau: "text-primary-emphasis"),
+        (Nhan: "Đang hoạt động", GiaTri: (int)ViewBag.HocVienHoatDong, Mau: "text-success-emphasis"),
+        (Nhan: "Đang bị khóa", GiaTri: (int)ViewBag.HocVienBiKhoa, Mau: "text-danger-emphasis")
+    };
+}
+
+<h1 class="h2 fw-semibold mb-4">Quản trị hệ thống</h1>
+
+@if (TempData["SuccessMessage"] is string thongBao)
+{
+    <div class="alert alert-success" role="status">@thongBao</div>
+}
+
+<ul class="nav nav-tabs gap-1 mb-4" role="tablist" aria-label="Chức năng quản trị">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="tabHocVien" type="button" role="tab" data-bs-toggle="tab"
+                data-bs-target="#mucHocVien" aria-controls="mucHocVien" aria-selected="true">
+            <i class="bi bi-people me-1" aria-hidden="true"></i> Thống kê &amp; Quản lý tài khoản học viên
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tabBaiHoc" type="button" role="tab" data-bs-toggle="tab"
+                data-bs-target="#mucBaiHoc" aria-controls="mucBaiHoc" aria-selected="false">
+            <i class="bi bi-bar-chart me-1" aria-hidden="true"></i> Thống kê số lượng học &amp; Bài học được nghe nhiều
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <section class="tab-pane fade show active" id="mucHocVien" role="tabpanel" aria-labelledby="tabHocVien" tabindex="0">
+        <div class="row g-3 mb-4">
+            @foreach (var chiSo in thongKeHocVien)
+            {
+                <div class="col-sm-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h2 class="h6 text-body-secondary">@chiSo.Nhan</h2>
+                            <p class="fs-2 fw-semibold mb-0 @chiSo.Mau">@chiSo.GiaTri.ToString("N0")</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="h5 mb-3" id="tieuDeHocVien">Danh sách tài khoản học viên</h2>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" aria-labelledby="tieuDeHocVien">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col" class="text-nowrap">Mã TK</th>
+                                <th scope="col">Họ tên</th>
+                                <th scope="col">Tên đăng nhập</th>
+                                <th scope="col">Email</th>
+                                <th scope="col" class="text-end">Điểm tích lũy</th>
+                                <th scope="col">Trạng thái</th>
+                                <th scope="col">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!Model.Any())
+                            {
+                                <tr><td colspan="7" class="text-center text-body-secondary py-4">Chưa có tài khoản học viên.</td></tr>
+                            }
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.MaTK</td>
+                                    <th scope="row" class="fw-medium text-break">@item.HoTen</th>
+                                    <td class="text-break">@item.TenDangNhap</td>
+                                    <td class="text-break">@item.Email</td>
+                                    <td class="text-end">@item.DiemTichLuy.ToString("N0")</td>
+                                    <td>
+                                        @if (item.TrangThaiTK)
+                                        {
+                                            <span class="badge text-bg-success">Đang hoạt động</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge text-bg-danger">Đang bị khóa</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="d-flex gap-2">
+                                            @if (item.TrangThaiTK)
+                                            {
+                                                <button class="btn btn-warning btn-sm" type="button" title="Khóa tài khoản"
+                                                        aria-label="Khóa tài khoản @item.TenDangNhap" data-bs-toggle="modal"
+                                                        data-bs-target="#modalKhoaTaiKhoan" data-ma-tk="@item.MaTK"
+                                                        data-ho-ten="@item.HoTen" data-ten-dang-nhap="@item.TenDangNhap" data-email="@item.Email">
+                                                    <i class="bi bi-lock-fill" aria-hidden="true"></i>
+                                                </button>
+                                                <button class="btn btn-secondary btn-sm opacity-25" type="button" aria-label="Mở khóa tài khoản" disabled>
+                                                    <i class="bi bi-unlock-fill" aria-hidden="true"></i>
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button class="btn btn-secondary btn-sm opacity-25" type="button" aria-label="Khóa tài khoản" disabled>
+                                                    <i class="bi bi-lock-fill" aria-hidden="true"></i>
+                                                </button>
+                                                <form asp-controller="Admin" asp-action="MoKhoaTaiKhoan" method="post">
+                                                    <input type="hidden" name="id" value="@item.MaTK" />
+                                                    <button class="btn btn-success btn-sm" type="submit" title="Mở khóa tài khoản"
+                                                            aria-label="Mở khóa tài khoản @item.TenDangNhap">
+                                                        <i class="bi bi-unlock-fill" aria-hidden="true"></i>
+                                                    </button>
+                                                </form>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="tab-pane fade" id="mucBaiHoc" role="tabpanel" aria-labelledby="tabBaiHoc" tabindex="0">
+        <div class="row g-3 mb-4">
+            <div class="col-sm-6">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h2 class="h6 text-body-secondary">Tổng số bài học</h2>
+                        <p class="fs-2 fw-semibold mb-0 text-primary-emphasis">@(((int)ViewBag.TongBaiHoc).ToString("N0"))</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h2 class="h6 text-body-secondary">Tổng lượt tham gia học</h2>
+                        <p class="fs-2 fw-semibold mb-0 text-primary-emphasis">@(((long)ViewBag.TongLuotThamGia).ToString("N0"))</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="h5 mb-3" id="tieuDeBaiHoc">Xếp hạng bài học theo lượt tham gia</h2>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" aria-labelledby="tieuDeBaiHoc">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col">Hạng</th>
+                                <th scope="col">Tên bài học</th>
+                                <th scope="col">Danh mục</th>
+                                <th scope="col">Cấp độ</th>
+                                <th scope="col" class="text-end">Số học viên đã học</th>
+                                <th scope="col" class="text-end">Tổng lượt luyện nghe</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (thongKeBaiHoc.Count == 0)
+                            {
+                                <tr><td colspan="6" class="text-center text-body-secondary py-4">Chưa có bài học.</td></tr>
+                            }
+                            @for (var i = 0; i < thongKeBaiHoc.Count; i++)
+                            {
+                                var baiHoc = thongKeBaiHoc[i];
+                                <tr>
+                                    <td>@(i + 1)</td>
+                                    <th scope="row" class="fw-medium text-break">@baiHoc.TenBaiHoc</th>
+                                    <td>@baiHoc.DanhMuc</td>
+                                    <td>@baiHoc.CapDo</td>
+                                    <td class="text-end">@baiHoc.SoHocVien.ToString("N0")</td>
+                                    <td class="text-end">@baiHoc.TongLuotLuyenNghe.ToString("N0")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div class="modal fade" id="modalKhoaTaiKhoan" tabindex="-1" aria-labelledby="tieuDeModalKhoa" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content" asp-controller="Admin" asp-action="KhoaTaiKhoan" method="post">
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" id="tieuDeModalKhoa">Xác nhận khóa tài khoản</h2>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" name="id" />
+                <p>Bạn có muốn khóa tài khoản học viên này?</p>
+                <dl class="row mb-0">
+                    <dt class="col-5">Mã TK</dt>
+                    <dd class="col-7" data-thong-tin="maTk"></dd>
+                    <dt class="col-5">Họ tên</dt>
+                    <dd class="col-7 text-break" data-thong-tin="hoTen"></dd>
+                    <dt class="col-5">Tên đăng nhập</dt>
+                    <dd class="col-7 text-break" data-thong-tin="tenDangNhap"></dd>
+                    <dt class="col-5">Email</dt>
+                    <dd class="col-7 text-break" data-thong-tin="email"></dd>
+                </dl>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Hủy</button>
+                <button class="btn btn-danger" type="submit">OK</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/admin-dashboard.js" asp-append-version="true"></script>
+}

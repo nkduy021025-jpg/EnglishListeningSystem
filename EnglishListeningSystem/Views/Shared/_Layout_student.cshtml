@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - EnglishListening</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/student.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="student-shell">
+    <header class="student-header">
+        <nav class="container d-flex align-items-center gap-2 gap-sm-4 py-3" aria-label="Điều hướng học viên">
+            <a class="student-brand" asp-controller="Home" asp-action="Index">EnglishListening</a>
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <form class="ms-auto" asp-controller="Account" asp-action="Logout" method="post">
+                    <button class="student-logout" type="submit">Đăng xuất</button>
+                </form>
+            }
+        </nav>
+    </header>
+
+    <main class="container py-4">
+        @RenderBody()
+    </main>
+
+    <footer class="student-footer">
+        <div class="container d-flex flex-wrap gap-2 py-3">
+            <span>&copy; 2026 EnglishListening</span>
+            <a asp-controller="Home" asp-action="Privacy">Quyền riêng tư</a>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
