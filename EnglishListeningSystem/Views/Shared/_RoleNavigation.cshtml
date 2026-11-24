@@ -1,0 +1,38 @@
+@{
+    var danhTinh = User.Identity;
+    bool daDangNhap = danhTinh != null && danhTinh.IsAuthenticated;
+    string? controllerHienTai = ViewContext.RouteData.Values["controller"]?.ToString();
+}
+
+@if (daDangNhap && User.IsInRole("Student"))
+{
+    bool dangOStudent = string.Equals(controllerHienTai, "Student", StringComparison.OrdinalIgnoreCase);
+    string? lopActive = dangOStudent ? "active" : null;
+    string? viTriHienTai = dangOStudent ? "location" : null;
+
+    <a class="role-nav-link @lopActive" aria-current="@viTriHienTai" asp-controller="Student" asp-action="Index">
+        <i class="bi bi-headphones me-1" aria-hidden="true"></i>Khu vực học tập
+    </a>
+}
+else if (daDangNhap && User.IsInRole("Admin"))
+{
+    bool dangOAdmin = string.Equals(controllerHienTai, "Admin", StringComparison.OrdinalIgnoreCase);
+    string? lopActive = dangOAdmin ? "active" : null;
+    string? viTriHienTai = dangOAdmin ? "location" : null;
+    string tenMucQuanTri = dangOAdmin ? "Quản lý" : "Trang quản trị";
+
+    <a class="role-nav-link @lopActive" aria-current="@viTriHienTai" asp-controller="Admin" asp-action="Index">
+        <i class="bi bi-speedometer2 me-1" aria-hidden="true"></i>@tenMucQuanTri
+    </a>
+}
+else if (daDangNhap && User.IsInRole("Instructor"))
+{
+    bool dangOInstructor = string.Equals(controllerHienTai, "Instructor", StringComparison.OrdinalIgnoreCase);
+    string? lopActive = dangOInstructor ? "active" : null;
+    string? viTriHienTai = dangOInstructor ? "location" : null;
+    string tenMucGiangVien = dangOInstructor ? "Quản lý bài học" : "Kênh giảng viên";
+
+    <a class="role-nav-link @lopActive" aria-current="@viTriHienTai" asp-controller="Instructor" asp-action="Index">
+        <i class="bi bi-easel me-1" aria-hidden="true"></i>@tenMucGiangVien
+    </a>
+}

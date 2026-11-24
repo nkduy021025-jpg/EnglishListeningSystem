@@ -1,8 +1,25 @@
-namespace EnglishListeningSystem.Models.ViewModel;
+namespace EnglishListeningSystem.Models.ViewModel
+{
+    public sealed class ThongKeBaiHoc
+    {
+        public string TenBaiHoc { get; }
+        public string DanhMuc { get; }
+        public string CapDo { get; }
+        public int SoHocVien { get; }
+        public long TongLuotLuyenNghe { get; }
 
-public sealed record ThongKeBaiHoc(
-    string TenBaiHoc,
-    string DanhMuc,
-    string CapDo,
-    int SoHocVien,
-    long TongLuotLuyenNghe);
+        public ThongKeBaiHoc(
+            string tenBaiHoc,
+            string danhMuc,
+            string capDo,
+            int soHocVien,
+            long tongLuotLuyenNghe)
+        {
+            TenBaiHoc = tenBaiHoc;
+            DanhMuc = danhMuc;
+            CapDo = capDo;
+            SoHocVien = soHocVien;
+            TongLuotLuyenNghe = tongLuotLuyenNghe;
+        }
+    }
+}

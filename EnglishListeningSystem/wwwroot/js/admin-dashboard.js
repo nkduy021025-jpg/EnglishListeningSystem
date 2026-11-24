@@ -1,19 +1,34 @@
-(() => {
-    const modal = document.getElementById("modalKhoaTaiKhoan");
-    const maTaiKhoan = modal.querySelector('input[name="id"]');
-    const thongTinHocVien = modal.querySelectorAll("[data-thong-tin]");
+(function () {
+    function ganDuLieuModal(modal, tenKhoa, nutChuyenModal) {
+        modal.addEventListener("show.bs.modal", function (event) {
+            var nutMoModal = event.relatedTarget;
+            if (!nutMoModal || !nutMoModal.dataset || !nutMoModal.dataset[tenKhoa]) {
+                event.preventDefault();
+                return;
+            }
 
-    // Lấy thông tin từ nút khóa vừa được bấm và điền vào hộp xác nhận.
-    modal.addEventListener("show.bs.modal", event => {
-        const hocVien = event.relatedTarget?.dataset;
-        if (!hocVien?.maTk) {
-            event.preventDefault();
-            return;
-        }
+            // Giữ mã tài khoản hoặc mã yêu cầu khi mở đúng hộp thoại.
+            var taiKhoan = nutMoModal.dataset;
+            var cacOMa = modal.querySelectorAll('input[name="id"]');
+            for (var i = 0; i < cacOMa.length; i++) {
+                cacOMa[i].value = taiKhoan[tenKhoa];
+            }
 
-        maTaiKhoan.value = hocVien.maTk;
-        thongTinHocVien.forEach(muc => {
-            muc.textContent = hocVien[muc.dataset.thongTin];
+            var cacMucThongTin = modal.querySelectorAll("[data-thong-tin]");
+            for (var j = 0; j < cacMucThongTin.length; j++) {
+                var muc = cacMucThongTin[j];
+                muc.textContent = taiKhoan[muc.dataset.thongTin];
+            }
+
+            if (nutChuyenModal) {
+                nutChuyenModal.dataset.yeuCauId = taiKhoan.yeuCauId;
+                nutChuyenModal.dataset.hoTen = taiKhoan.hoTen;
+            }
         });
-    });
+    }
+
+    ganDuLieuModal(document.getElementById("modalKhoaTaiKhoan"), "maTk");
+    ganDuLieuModal(document.getElementById("modalChiTietGiangVien"), "yeuCauId",
+        document.getElementById("nutKhongDuyetGiangVien"));
+    ganDuLieuModal(document.getElementById("modalXacNhanHuyYeuCau"), "yeuCauId");
 })();

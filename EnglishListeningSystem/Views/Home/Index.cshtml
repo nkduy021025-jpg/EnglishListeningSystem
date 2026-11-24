@@ -15,11 +15,15 @@
             <h1 id="listening-title">Nghe mỗi ngày.<br /><span>Hiểu thêm mỗi ngày.</span></h1>
             <p class="listening-description">Luyện nghe theo chủ đề, từ những tình huống quen thuộc đến các đoạn hội thoại tiếng Anh trong đời sống.</p>
             <div class="listening-actions">
-                @if (signedIn)
+                @if (signedIn && User.IsInRole("Student"))
                 {
                     <a class="listening-primary" asp-controller="Student" asp-action="Index">Xem chủ đề <span aria-hidden="true">↗</span></a>
                 }
-                else
+                else if (signedIn && User.IsInRole("Admin"))
+                {
+                    <a class="listening-primary" asp-controller="Admin" asp-action="Index">Trang quản trị <span aria-hidden="true">↗</span></a>
+                }
+                else if (!signedIn)
                 {
                     <button class="listening-primary" type="button" data-bs-toggle="modal" data-bs-target="#registerModal">
                         Bắt đầu luyện nghe <span aria-hidden="true">↗</span>

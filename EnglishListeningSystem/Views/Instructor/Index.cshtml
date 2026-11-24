@@ -1,0 +1,344 @@
+@model IEnumerable<EnglishListeningSystem.Models.BaiHoc>
+
+@{
+    Layout = "~/Views/Shared/_Layout_Instructor.cshtml";
+    BaiHoc? baiHocCauHoi = ViewBag.BaiHocCauHoi as BaiHoc;
+    string? thongBaoThanhCong = TempData["SuccessMessage"] as string;
+    string? thongBaoLoi = TempData["ErrorMessage"] as string;
+    ViewData["Title"] = baiHocCauHoi == null ? "Quản lý bài học" : "Danh sách câu hỏi";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/instructor.css" asp-append-version="true" />
+}
+
+@if (thongBaoThanhCong != null)
+{
+    <div class="alert alert-success d-flex align-items-start gap-2" role="status">
+        <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
+        <span>@thongBaoThanhCong</span>
+    </div>
+}
+@if (thongBaoLoi != null)
+{
+    <div class="alert alert-danger d-flex align-items-start gap-2" role="alert">
+        <i class="bi bi-exclamation-circle-fill" aria-hidden="true"></i>
+        <span>@thongBaoLoi</span>
+    </div>
+}
+
+@if (baiHocCauHoi != null)
+{
+    IReadOnlyList<CauChep> dsCauHoi = (IReadOnlyList<CauChep>)ViewBag.DanhSachCauHoi;
+
+    <a class="btn btn-outline-primary mb-3" asp-action="Index">
+        <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Quản lý bài học
+    </a>
+    <h1 class="h2 mb-1">Danh sách câu hỏi</h1>
+    <p class="text-body-secondary mb-4">@baiHocCauHoi.TenBH · @dsCauHoi.Count câu</p>
+
+    <div class="card border-0 shadow-sm">
+        @if (dsCauHoi.Count == 0)
+        {
+            <p class="text-body-secondary text-center mb-0 p-5">Bài học này chưa có câu hỏi.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col" class="text-nowrap">Thứ tự</th>
+                            <th scope="col">Nội dung chuẩn</th>
+                            <th scope="col" class="text-nowrap">Thời gian (giây)</th>
+                            <th scope="col">Gợi ý</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (CauChep cau in dsCauHoi)
+                        {
+                            <tr>
+                                <td>@cau.ThuTuCau</td>
+                                <th scope="row" class="fw-medium text-break">@cau.NoiDungChuan</th>
+                                <td class="text-nowrap">@cau.ThoiGianBatDau – @cau.ThoiGianKetThuc</td>
+                                <td class="text-break">@cau.GoiY</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+    return;
+}
+
+@{
+    IReadOnlyList<DanhMuc> dsDanhMuc = (IReadOnlyList<DanhMuc>)ViewBag.DanhMucs;
+    int tongBaiHoc = (int)ViewBag.TongBaiHoc;
+    int tongCauHoi = (int)ViewBag.TongCauHoi;
+    int? maDanhMuc = (int?)ViewBag.MaDM;
+    string tuKhoa = (string)ViewBag.Search;
+    bool coBoLoc = maDanhMuc.HasValue || tuKhoa.Length > 0;
+    string thongBaoTrong = coBoLoc ? "Không tìm thấy bài học phù hợp với bộ lọc." : "Chưa có bài học nào.";
+}
+
+<div class="instructor-heading rounded-4 p-4 p-lg-5 mb-4">
+    <h1 class="h2 fw-bold mb-2">Quản lý bài học</h1>
+    <p class="text-body-secondary mb-0">Theo dõi bài luyện nghe và câu hỏi chép chính tả theo chủ đề.</p>
+</div>
+
+<div class="row row-cols-1 row-cols-sm-3 g-3 mb-4">
+    <div class="col">
+        <div class="card instructor-stat h-100 border-0 shadow-sm">
+            <div class="card-body d-flex align-items-center gap-3 p-3 p-lg-4">
+                <span class="instructor-stat-icon bg-primary-subtle text-primary-emphasis">
+                    <i class="bi bi-book" aria-hidden="true"></i>
+                </span>
+                <div>
+                    <p class="text-body-secondary small mb-1">Tổng số bài học</p>
+                    <p class="fs-3 fw-semibold lh-1 mb-0">@tongBaiHoc.ToString("N0")</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card instructor-stat h-100 border-0 shadow-sm">
+            <div class="card-body d-flex align-items-center gap-3 p-3 p-lg-4">
+                <span class="instructor-stat-icon bg-success-subtle text-success-emphasis">
+                    <i class="bi bi-soundwave" aria-hidden="true"></i>
+                </span>
+                <div>
+                    <p class="text-body-secondary small mb-1">Tổng số câu hỏi</p>
+                    <p class="fs-3 fw-semibold lh-1 mb-0">@tongCauHoi.ToString("N0")</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card instructor-stat h-100 border-0 shadow-sm">
+            <div class="card-body d-flex align-items-center gap-3 p-3 p-lg-4">
+                <span class="instructor-stat-icon bg-warning-subtle text-warning-emphasis">
+                    <i class="bi bi-collection" aria-hidden="true"></i>
+                </span>
+                <div>
+                    <p class="text-body-secondary small mb-1">Tổng số chủ đề</p>
+                    <p class="fs-3 fw-semibold lh-1 mb-0">@dsDanhMuc.Count.ToString("N0")</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="card border-0 shadow-sm" aria-labelledby="tieuDeDanhSach">
+    <div class="card-body p-3 p-lg-4">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+            <h2 class="h5 mb-0" id="tieuDeDanhSach">Danh sách bài học</h2>
+            <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#modalThemBaiHoc">
+                <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Thêm bài học mới
+            </button>
+        </div>
+
+        <form class="row g-2 align-items-end" asp-action="Index" method="get" role="search">
+            <div class="col-sm-5 col-lg-4">
+                <label class="form-label small fw-semibold" for="loc-chu-de">Chủ đề</label>
+                <select class="form-select" id="loc-chu-de" name="maDM">
+                    <option value="">Tất cả chủ đề</option>
+                    @foreach (DanhMuc dm in dsDanhMuc)
+                    {
+                        bool dangChon = maDanhMuc == dm.MaDM;
+                        <option value="@dm.MaDM" selected="@dangChon">@dm.TenDM</option>
+                    }
+                </select>
+            </div>
+            <div class="col-sm-7 col-lg-5">
+                <label class="form-label small fw-semibold" for="tim-bai-hoc">Tên bài học</label>
+                <input class="form-control" type="search" id="tim-bai-hoc" name="search" value="@tuKhoa" />
+            </div>
+            <div class="col-auto d-flex gap-2">
+                <button class="btn btn-outline-primary" type="submit">
+                    <i class="bi bi-search me-1" aria-hidden="true"></i>Tìm kiếm
+                </button>
+                @if (coBoLoc)
+                {
+                    <a class="btn btn-outline-secondary" asp-action="Index">Bỏ lọc</a>
+                }
+            </div>
+        </form>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" aria-labelledby="tieuDeDanhSach">
+            <thead class="table-light">
+                <tr>
+                    <th scope="col" class="ps-4 text-nowrap">Mã BH</th>
+                    <th scope="col">Tên bài học</th>
+                    <th scope="col">Chủ đề</th>
+                    <th scope="col" class="text-nowrap">Cấp độ</th>
+                    <th scope="col" class="text-center text-nowrap">Số câu hỏi</th>
+                    <th scope="col" class="pe-4 text-nowrap">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="6" class="text-center text-body-secondary py-5">@thongBaoTrong</td></tr>
+                }
+                @foreach (BaiHoc bh in Model)
+                {
+                    string lopCapDo = "text-bg-secondary";
+                    if (string.Equals(bh.CapDo, "Beginner", StringComparison.OrdinalIgnoreCase))
+                    {
+                        lopCapDo = "bg-success-subtle text-success-emphasis";
+                    }
+                    else if (string.Equals(bh.CapDo, "Intermediate", StringComparison.OrdinalIgnoreCase))
+                    {
+                        lopCapDo = "bg-primary-subtle text-primary-emphasis";
+                    }
+                    else if (string.Equals(bh.CapDo, "Advanced", StringComparison.OrdinalIgnoreCase))
+                    {
+                        lopCapDo = "bg-warning-subtle text-warning-emphasis";
+                    }
+
+                    <tr>
+                        <td class="ps-4 text-body-secondary">@bh.MaBH</td>
+                        <th scope="row" class="instructor-lesson-name fw-semibold text-break">@bh.TenBH</th>
+                        <td class="text-break">@bh.MaDMNavigation.TenDM</td>
+                        <td><span class="badge rounded-pill @lopCapDo">@bh.CapDo</span></td>
+                        <td class="text-center">@bh.CauCheps.Count</td>
+                        <td class="pe-4">
+                            <div class="d-flex flex-wrap gap-2">
+                                <a class="btn btn-sm btn-outline-primary text-nowrap" asp-action="DanhSachCauHoi" asp-route-maBH="@bh.MaBH">
+                                    <i class="bi bi-list-ol me-1" aria-hidden="true"></i>Xem câu hỏi
+                                </a>
+                                <button class="btn btn-sm btn-outline-secondary text-nowrap" type="button"
+                                        data-bs-toggle="modal" data-bs-target="#modalSuaBaiHoc" data-ma-bai="@bh.MaBH"
+                                        data-ten="@bh.TenBH" data-chu-de="@bh.MaDM" data-cap-do="@bh.CapDo" data-audio="@bh.AudioUrl">
+                                    <i class="bi bi-pencil-square me-1" aria-hidden="true"></i>Sửa
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger text-nowrap" type="button"
+                                        data-bs-toggle="modal" data-bs-target="#modalXoaBaiHoc" data-ma-bai="@bh.MaBH" data-ten="@bh.TenBH">
+                                    <i class="bi bi-trash3 me-1" aria-hidden="true"></i>Xóa
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<datalist id="goi-y-cap-do">
+    <option value="Beginner"></option>
+    <option value="Intermediate"></option>
+    <option value="Advanced"></option>
+</datalist>
+
+<div class="modal fade" id="modalThemBaiHoc" tabindex="-1" aria-labelledby="modalThemBaiHocLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content" asp-action="ThemBaiHoc" method="post">
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" id="modalThemBaiHocLabel">Thêm bài học mới</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" for="them-ten">Tên bài học</label>
+                    <input class="form-control" id="them-ten" name="TenBH" maxlength="200" required />
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-sm-7">
+                        <label class="form-label" for="them-chu-de">Chủ đề</label>
+                        <select class="form-select" id="them-chu-de" name="MaDM" required>
+                            <option value="">Chọn chủ đề</option>
+                            @foreach (DanhMuc dm in dsDanhMuc)
+                            {
+                                <option value="@dm.MaDM">@dm.TenDM</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-sm-5">
+                        <label class="form-label" for="them-cap-do">Cấp độ</label>
+                        <input class="form-control" id="them-cap-do" name="CapDo" list="goi-y-cap-do" maxlength="50" required />
+                    </div>
+                </div>
+                <div>
+                    <label class="form-label" for="them-audio">Đường dẫn audio <span class="text-body-secondary fw-normal">(tùy chọn)</span></label>
+                    <input class="form-control" id="them-audio" name="AudioUrl" maxlength="255" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Hủy</button>
+                <button class="btn btn-primary" type="submit">Thêm bài học</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="modalSuaBaiHoc" tabindex="-1" aria-labelledby="modalSuaBaiHocLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content" asp-action="SuaBaiHoc" method="post">
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" id="modalSuaBaiHocLabel">Sửa bài học</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" name="MaBH" id="sua-ma-bai" />
+                <div class="mb-3">
+                    <label class="form-label" for="sua-ten">Tên bài học</label>
+                    <input class="form-control" id="sua-ten" name="TenBH" maxlength="200" required />
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-sm-7">
+                        <label class="form-label" for="sua-chu-de">Chủ đề</label>
+                        <select class="form-select" id="sua-chu-de" name="MaDM" required>
+                            <option value="">Chọn chủ đề</option>
+                            @foreach (DanhMuc dm in dsDanhMuc)
+                            {
+                                <option value="@dm.MaDM">@dm.TenDM</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-sm-5">
+                        <label class="form-label" for="sua-cap-do">Cấp độ</label>
+                        <input class="form-control" id="sua-cap-do" name="CapDo" list="goi-y-cap-do" maxlength="50" required />
+                    </div>
+                </div>
+                <div>
+                    <label class="form-label" for="sua-audio">Đường dẫn audio <span class="text-body-secondary fw-normal">(tùy chọn)</span></label>
+                    <input class="form-control" id="sua-audio" name="AudioUrl" maxlength="255" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Hủy</button>
+                <button class="btn btn-primary" type="submit">Lưu thay đổi</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="modalXoaBaiHoc" tabindex="-1" aria-labelledby="modalXoaBaiHocLabel"
+     aria-describedby="mo-ta-xoa-bai" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content" asp-action="XoaBaiHoc" method="post">
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" id="modalXoaBaiHocLabel">
+                    <i class="bi bi-exclamation-triangle text-danger me-2" aria-hidden="true"></i>Xóa bài học
+                </h2>
+            </div>
+            <div class="modal-body" id="mo-ta-xoa-bai">
+                <input type="hidden" name="id" id="xoa-ma-bai" />
+                <p class="mb-2">Bạn muốn xóa bài học <strong class="text-break" id="xoa-ten-bai"></strong>?</p>
+                <p class="small text-body-secondary mb-0">Chỉ có thể xóa bài học chưa có câu hỏi hoặc dữ liệu học viên.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Hủy</button>
+                <button class="btn btn-danger" type="submit">OK</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/instructor.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,19 @@
+.instructor-heading {
+    border: 1px solid #dce6f5;
+    background: linear-gradient(115deg, #eef5ff, #fff 78%);
+    color: #172b47;
+}
+
+.instructor-stat-icon {
+    display: inline-grid;
+    flex: 0 0 2.75rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    place-items: center;
+    border-radius: .75rem;
+    font-size: 1.25rem;
+}
+
+.instructor-lesson-name {
+    min-width: 10rem;
+}

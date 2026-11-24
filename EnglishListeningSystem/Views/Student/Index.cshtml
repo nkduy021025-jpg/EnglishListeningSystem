@@ -7,7 +7,7 @@
 <nav aria-label="Đường dẫn">
     <ol class="breadcrumb student-breadcrumb">
         <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
-        
+        <li class="breadcrumb-item active" aria-current="page">Bài học</li>
     </ol>
 </nav>
 
@@ -28,7 +28,7 @@ else
                         <span class="topic-icon" aria-hidden="true">🎧</span>
                         <div class="topic-content">
                             <h2 class="topic-heading">
-                                <a asp-controller="Student" asp-action="DanhSachBaiHoc" asp-route-id="@topic.MaDM" class="stretched-link">
+                                <a asp-controller="Student" asp-action="Baihoc" asp-route-id="@topic.MaDM" class="stretched-link">
                                     @topic.TenDM
                                 </a>
                             </h2>

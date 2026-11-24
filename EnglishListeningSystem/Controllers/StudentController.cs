@@ -6,11 +6,11 @@ using System.Security.Claims;
 
 namespace EnglishListeningSystem.Controllers
 {
-    
     [Authorize(Roles = "Student")]
     public class StudentController : Controller
     {
         private readonly ApplicationDbContext _context;
+
         public StudentController(ApplicationDbContext context)
         {
             _context = context;
@@ -18,70 +18,87 @@ namespace EnglishListeningSystem.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var dsDanhMuc = _context.DanhMucs
+            List<DanhMuc> dsDanhMuc = await _context.DanhMucs
                 .Include(dm => dm.BaiHocs)
                 .Where(dm => dm.TrangThaiHienThi == true)
-                .ToList();
+                .ToListAsync();
 
             return View(dsDanhMuc);
         }
 
-        
         public Task<IActionResult> Baihoc(int id, string? search, string? level)
-            => DanhSachBaiHoc(id, search, level);
+        {
+            return DanhSachBaiHoc(id, search, level);
+        }
 
         public async Task<IActionResult> DanhSachBaiHoc(int id, string? search, string? level)
         {
-            var category = await _context.DanhMucs
+            DanhMuc? danhMuc = await _context.DanhMucs
                 .AsNoTracking()
                 .Include(item => item.BaiHocs)
                     .ThenInclude(lesson => lesson.DanhGias)
                 .SingleOrDefaultAsync(item => item.MaDM == id && item.TrangThaiHienThi);
 
-            if (category == null)
+            if (danhMuc == null)
             {
                 return NotFound();
             }
 
-            search = search?.Trim() ?? string.Empty;
-            level = level?.Trim() ?? string.Empty;
-            var levels = category.BaiHocs.Select(lesson => lesson.CapDo)
-                .Where(value => !string.IsNullOrWhiteSpace(value))
+            search = (search ?? string.Empty).Trim();
+            level = (level ?? string.Empty).Trim();
+
+            IEnumerable<string> capDoCuaCacBai = danhMuc.BaiHocs.Select(bh => bh.CapDo);
+            string[] dsCapDo = capDoCuaCacBai
+                .Where(capDo => !string.IsNullOrWhiteSpace(capDo))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
-                .OrderBy(value => value, StringComparer.OrdinalIgnoreCase)
+                .OrderBy(capDo => capDo, StringComparer.OrdinalIgnoreCase)
                 .ToArray();
-            var soCauTheoBai = await _context.CauCheps
-                .Where(cau => cau.TrangThaiDuyet && cau.MaBHNavigation.MaDM == id)
-                .GroupBy(cau => cau.MaBH)
-                .Select(group => new { MaBH = group.Key, SoCau = group.Count() })
+
+            IQueryable<CauChep> dsCauDaDuyet = _context.CauCheps
+                .Where(cau => cau.TrangThaiDuyet && cau.MaBHNavigation.MaDM == id);
+            var nhomCauTheoBai = dsCauDaDuyet.GroupBy(cau => cau.MaBH);
+            var thongKeSoCau = nhomCauTheoBai.Select(nhom => new { MaBH = nhom.Key, SoCau = nhom.Count() });
+            Dictionary<int, int> soCauTheoBai = await thongKeSoCau
                 .ToDictionaryAsync(item => item.MaBH, item => item.SoCau);
 
-            var lessons = category.BaiHocs
-                .Where(lesson => lesson.TenBH.Contains(search, StringComparison.CurrentCultureIgnoreCase)
-                    && (level.Length == 0 || string.Equals(lesson.CapDo, level, StringComparison.OrdinalIgnoreCase)))
-                .OrderBy(lesson => lesson.MaBH)
-                .Select(lesson => new StudentLesson(lesson.MaBH, lesson.TenBH, lesson.CapDo,
-                    soCauTheoBai.GetValueOrDefault(lesson.MaBH), TinhDiemTrungBinh(lesson.DanhGias), lesson.DanhGias.Count))
-                .ToArray();
+            // Lọc theo tên bài và cấp độ trước khi hiện danh sách.
+            IEnumerable<BaiHoc> dsBaiPhuHop = danhMuc.BaiHocs
+                .Where(bh => bh.TenBH.Contains(search, StringComparison.CurrentCultureIgnoreCase)
+                    && (level.Length == 0 || string.Equals(bh.CapDo, level, StringComparison.OrdinalIgnoreCase)))
+                .OrderBy(bh => bh.MaBH);
 
-            return View(nameof(DanhSachBaiHoc), new StudentLessonsViewModel(id, category.TenDM, search, level, levels, lessons));
+            List<StudentLesson> dsBaiHoc = new List<StudentLesson>();
+            foreach (BaiHoc bh in dsBaiPhuHop)
+            {
+                int soCau = soCauTheoBai.GetValueOrDefault(bh.MaBH);
+                double diemTrungBinh = TinhDiemTrungBinh(bh.DanhGias);
+                StudentLesson baiHoc = new StudentLesson(
+                    bh.MaBH, bh.TenBH, bh.CapDo, soCau, diemTrungBinh, bh.DanhGias.Count);
+                dsBaiHoc.Add(baiHoc);
+            }
+
+            StudentLessonsViewModel model = new StudentLessonsViewModel(
+                id, danhMuc.TenDM, search, level, dsCapDo, dsBaiHoc);
+            return View(nameof(DanhSachBaiHoc), model);
         }
 
         [HttpGet]
         public async Task<IActionResult> LuyenNghe(int id, int thuTu = 1)
         {
-            var lesson = await _context.BaiHocs
-                .Where(item => item.MaBH == id && item.MaDMNavigation.TrangThaiHienThi)
-                .Select(item => new
+            IQueryable<BaiHoc> baiHocHienThi = _context.BaiHocs
+                .Where(bh => bh.MaBH == id && bh.MaDMNavigation.TrangThaiHienThi);
+            var baiHoc = await baiHocHienThi
+                .Select(bh => new
                 {
-                    item.MaBH,
-                    item.MaDM,
-                    item.MaDMNavigation.TenDM,
-                    item.TenBH,
-                    item.CapDo,
-                    item.AudioUrl,
-                    item.YoutubeUrl,
-                    Sentences = item.CauCheps.Where(cau => cau.TrangThaiDuyet)
+                    bh.MaBH,
+                    bh.MaDM,
+                    bh.MaDMNavigation.TenDM,
+                    bh.TenBH,
+                    bh.CapDo,
+                    bh.AudioUrl,
+                    bh.YoutubeUrl,
+                    DsCau = bh.CauCheps
+                        .Where(cau => cau.TrangThaiDuyet)
                         .OrderBy(cau => cau.ThuTuCau)
                         .ThenBy(cau => cau.MaCau)
                         .Select(cau => new DictationSentence(cau.NoiDungChuan, cau.ThoiGianBatDau, cau.ThoiGianKetThuc))
@@ -89,65 +106,92 @@ namespace EnglishListeningSystem.Controllers
                 })
                 .SingleOrDefaultAsync();
 
-            if (lesson == null)
+            if (baiHoc == null)
             {
                 return NotFound();
             }
 
-            var danhGias = await _context.DanhGias.AsNoTracking()
+            List<DanhGia> dsDanhGia = await _context.DanhGias.AsNoTracking()
                 .Where(item => item.MaBH == id)
                 .Include(item => item.MaTKNavigation)
                 .OrderByDescending(item => item.NgayDanhGia)
                 .ThenByDescending(item => item.MaDG)
                 .ToListAsync();
 
-            ViewBag.DiemDanhGiaTrungBinh = TinhDiemTrungBinh(danhGias);
-            ViewBag.TongLuotDanhGia = danhGias.Count;
-            ViewBag.DanhGiaHienTai = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var maTK)
-                ? danhGias.Find(item => item.MaTK == maTK)
-                : null;
-            ViewBag.DanhGiaMoiNhat = danhGias.Take(10).ToList();
+            DanhGia? danhGiaHienTai = null;
+            string? maTaiKhoan = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (int.TryParse(maTaiKhoan, out int maTK))
+            {
+                danhGiaHienTai = dsDanhGia.Find(item => item.MaTK == maTK);
+            }
 
-            var viTriCau = Math.Clamp(thuTu, 1, Math.Max(1, lesson.Sentences.Count));
-            return View(new StudentPracticeViewModel(lesson.MaBH, lesson.MaDM, lesson.TenDM,
-                lesson.TenBH, lesson.CapDo, lesson.AudioUrl, lesson.YoutubeUrl, lesson.Sentences, viTriCau));
+            ViewBag.DiemDanhGiaTrungBinh = TinhDiemTrungBinh(dsDanhGia);
+            ViewBag.TongLuotDanhGia = dsDanhGia.Count;
+            ViewBag.DanhGiaHienTai = danhGiaHienTai;
+            ViewBag.DanhGiaMoiNhat = dsDanhGia.Take(10).ToList();
+
+            int viTriMax = Math.Max(1, baiHoc.DsCau.Count);
+            int viTriCau = Math.Clamp(thuTu, 1, viTriMax);
+            StudentPracticeViewModel model = new StudentPracticeViewModel(
+                baiHoc.MaBH, baiHoc.MaDM, baiHoc.TenDM, baiHoc.TenBH, baiHoc.CapDo,
+                baiHoc.AudioUrl, baiHoc.YoutubeUrl, baiHoc.DsCau, viTriCau);
+            return View(model);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DanhGiaBaiHoc(int maBH, int thuTu, int soSao, string? nhanXet)
         {
-            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var maTK) || maTK <= 0)
+            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int maTK) || maTK <= 0)
             {
                 return Forbid();
             }
 
-            if (!await _context.BaiHocs.AnyAsync(item => item.MaBH == maBH && item.MaDMNavigation.TrangThaiHienThi))
+            bool baiHocHienThi = await _context.BaiHocs
+                .AnyAsync(bh => bh.MaBH == maBH && bh.MaDMNavigation.TrangThaiHienThi);
+            if (baiHocHienThi == false)
             {
                 return NotFound();
             }
 
-            if (soSao is < 1 or > 5 || nhanXet?.Length > 500)
+            bool nhanXetQuaDai = nhanXet != null && nhanXet.Length > 500;
+            if (soSao < 1 || soSao > 5 || nhanXetQuaDai)
             {
                 TempData["DanhGiaError"] = "Hãy chọn từ 1 đến 5 sao và nhập nhận xét tối đa 500 ký tự.";
                 return RedirectToAction(nameof(LuyenNghe), new { id = maBH, thuTu });
             }
 
-            nhanXet = string.IsNullOrWhiteSpace(nhanXet) ? null : nhanXet.Trim();
-            var ngayDanhGia = DateTime.Now;
+            if (string.IsNullOrWhiteSpace(nhanXet))
+            {
+                nhanXet = null;
+            }
+            else
+            {
+                nhanXet = nhanXet.Trim();
+            }
 
-            // MySQL thêm hoặc cập nhật trong một lệnh, kể cả khi gửi đồng thời.
-            await _context.Database.ExecuteSqlInterpolatedAsync($"""
-                INSERT INTO `DanhGia` (`MaTK`, `MaBH`, `SoSao`, `NhanXet`, `NgayDanhGia`)
+            DateTime ngayDanhGia = DateTime.Now;
+
+            // Nếu đã đánh giá bài này, MySQL cập nhật đánh giá cũ.
+            FormattableString lenhSql = $@"INSERT INTO `DanhGia` (`MaTK`, `MaBH`, `SoSao`, `NhanXet`, `NgayDanhGia`)
                 VALUES ({maTK}, {maBH}, {soSao}, {nhanXet}, {ngayDanhGia})
-                ON DUPLICATE KEY UPDATE `SoSao` = {soSao}, `NhanXet` = {nhanXet}, `NgayDanhGia` = {ngayDanhGia}
-                """);
+                ON DUPLICATE KEY UPDATE `SoSao` = {soSao}, `NhanXet` = {nhanXet}, `NgayDanhGia` = {ngayDanhGia}";
+            await _context.Database.ExecuteSqlInterpolatedAsync(lenhSql);
 
             TempData["DanhGiaSuccess"] = "Đã lưu đánh giá của bạn.";
             return RedirectToAction(nameof(LuyenNghe), new { id = maBH, thuTu });
         }
 
         private static double TinhDiemTrungBinh(ICollection<DanhGia> danhGias)
-            => danhGias.Count == 0 ? 0 : Math.Round(danhGias.Average(item => item.SoSao), 1, MidpointRounding.AwayFromZero);
+        {
+            if (danhGias.Count == 0)
+            {
+                return 0;
+            }
+
+            double diemTrungBinh = danhGias.Average(dg => dg.SoSao);
+            // Làm tròn điểm để hiển thị một chữ số thập phân.
+            return Math.Round(diemTrungBinh, 1, MidpointRounding.AwayFromZero);
+        }
     }
 }

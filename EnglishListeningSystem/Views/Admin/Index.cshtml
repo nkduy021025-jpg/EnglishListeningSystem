@@ -5,6 +5,9 @@
     Layout = "~/Views/Shared/_Layout_Admin.cshtml";
     ViewData["Title"] = "Quản trị hệ thống";
     var thongKeBaiHoc = (IReadOnlyList<ThongKeBaiHoc>)ViewBag.ThongKeBaiHoc;
+    IReadOnlyList<YeuCauGiangVien> dsChoDuyet = (IReadOnlyList<YeuCauGiangVien>)ViewBag.DsChoDuyet;
+    int soLuongChoDuyet = (int)ViewBag.SoLuongChoDuyet;
+    string? thongBaoLoi = TempData["ErrorMessage"] as string;
     var thongKeHocVien = new[]
     {
         (Nhan: "Tổng số học viên", GiaTri: (int)ViewBag.TongHocVien, Mau: "text-primary-emphasis"),
@@ -19,6 +22,49 @@
 {
     <div class="alert alert-success" role="status">@thongBao</div>
 }
+@if (thongBaoLoi != null)
+{
+    <div class="alert alert-danger" role="alert">@thongBaoLoi</div>
+}
+
+<section class="card shadow-sm mb-4" aria-labelledby="tieuDeThongBaoPheDuyet">
+    <h2 class="h6 mb-0" id="tieuDeThongBaoPheDuyet">
+        <button class="btn btn-light d-flex align-items-center gap-2 w-100 p-3 text-start fw-semibold" type="button"
+                data-bs-toggle="collapse" data-bs-target="#thongBaoPheDuyet"
+                aria-expanded="false" aria-controls="thongBaoPheDuyet">
+            <i class="bi bi-bell-fill text-primary" aria-hidden="true"></i>
+            <span>Thông báo phê duyệt</span>
+            <span class="badge rounded-pill text-bg-danger" aria-label="@soLuongChoDuyet yêu cầu đang chờ">@soLuongChoDuyet</span>
+            <i class="bi bi-chevron-down ms-auto" aria-hidden="true"></i>
+        </button>
+    </h2>
+    <div class="collapse" id="thongBaoPheDuyet">
+        @if (dsChoDuyet.Count == 0)
+        {
+            <p class="card-body text-body-secondary border-top mb-0">Không có thông báo yêu cầu phê duyệt mới.</p>
+        }
+        else
+        {
+            <div class="list-group list-group-flush border-top">
+                @foreach (YeuCauGiangVien gv in dsChoDuyet)
+                {
+                    string ngayGui = gv.NgayGui.ToString("dd/MM/yyyy HH:mm");
+                    <button class="list-group-item list-group-item-action d-flex align-items-center gap-3 px-3 py-3" type="button"
+                            data-bs-toggle="modal" data-bs-target="#modalChiTietGiangVien" data-yeu-cau-id="@gv.Id"
+                            data-ho-ten="@gv.HoTen" data-ten-dang-nhap="@gv.TenDangNhap" data-email="@gv.Email"
+                            data-ngay-gui="@ngayGui">
+                        <i class="bi bi-person-vcard fs-5 text-primary" aria-hidden="true"></i>
+                        <span class="flex-grow-1 text-break">
+                            <strong class="d-block">@gv.HoTen</strong>
+                            <span class="d-block small text-body-secondary">@gv.TenDangNhap · @gv.Email</span>
+                        </span>
+                        <i class="bi bi-chevron-right text-body-secondary" aria-hidden="true"></i>
+                    </button>
+                }
+            </div>
+        }
+    </div>
+</section>
 
 <ul class="nav nav-tabs gap-1 mb-4" role="tablist" aria-label="Chức năng quản trị">
     <li class="nav-item" role="presentation">
@@ -211,6 +257,62 @@
             <div class="modal-footer">
                 <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Hủy</button>
                 <button class="btn btn-danger" type="submit">OK</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="modalChiTietGiangVien" tabindex="-1" aria-labelledby="tieuDeModalDuyet" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-white text-dark">
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" id="tieuDeModalDuyet">Yêu cầu đăng ký giảng viên</h2>
+                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body">
+                <dl class="row mb-0">
+                    <dt class="col-5">Họ tên</dt>
+                    <dd class="col-7 text-break" data-thong-tin="hoTen"></dd>
+                    <dt class="col-5">Tên đăng nhập</dt>
+                    <dd class="col-7 text-break" data-thong-tin="tenDangNhap"></dd>
+                    <dt class="col-5">Email</dt>
+                    <dd class="col-7 text-break" data-thong-tin="email"></dd>
+                    <dt class="col-5 mb-0">Ngày gửi</dt>
+                    <dd class="col-7 mb-0" data-thong-tin="ngayGui"></dd>
+                </dl>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-danger" id="nutKhongDuyetGiangVien" type="button"
+                        data-bs-toggle="modal" data-bs-target="#modalXacNhanHuyYeuCau">
+                    <i class="bi bi-x-circle me-1" aria-hidden="true"></i>Không duyệt
+                </button>
+                <form asp-action="DuyetGiangVien" asp-controller="Admin" method="post">
+                    <input type="hidden" name="id" />
+                    <button class="btn btn-success" type="submit">
+                        <i class="bi bi-check-circle me-1" aria-hidden="true"></i>Duyệt
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalXacNhanHuyYeuCau" tabindex="-1" aria-labelledby="tieuDeModalHuyYeuCau"
+     aria-describedby="noiDungModalHuyYeuCau" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content bg-white text-dark" asp-action="HuyYeuCauGiangVien" asp-controller="Admin" method="post">
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" id="tieuDeModalHuyYeuCau">Xác nhận hủy yêu cầu</h2>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" name="id" />
+                <p class="mb-0" id="noiDungModalHuyYeuCau">
+                    Bạn muốn hủy yêu cầu đăng ký của <strong class="text-break" data-thong-tin="hoTen"></strong>?
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-danger" type="submit">Hủy</button>
             </div>
         </form>
     </div>

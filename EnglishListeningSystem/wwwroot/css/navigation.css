@@ -1,0 +1,42 @@
+.role-nav-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.5rem;
+    padding: .4rem .8rem;
+    border: 1px solid transparent;
+    border-radius: .65rem;
+    color: var(--role-nav-text, #084298);
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color .15s ease, border-color .15s ease;
+}
+
+.role-nav-link:hover,
+.role-nav-link:focus-visible,
+.role-nav-link.active {
+    border-color: var(--role-nav-border, #9ec5fe);
+    background-color: var(--role-nav-bg, #cfe2ff);
+    color: var(--role-nav-text, #084298);
+}
+
+.role-nav-link:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+
+.role-nav-link.active {
+    font-weight: 700;
+}
+
+.listening-nav,
+.student-header {
+    --role-nav-text: #19382f;
+    --role-nav-border: #819b89;
+    --role-nav-bg: #e4ece3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .role-nav-link {
+        transition: none;
+    }
+}

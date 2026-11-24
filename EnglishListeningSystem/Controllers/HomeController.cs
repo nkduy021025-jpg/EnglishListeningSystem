@@ -26,7 +26,15 @@ namespace EnglishListeningSystem.Controllers
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            string? maYeuCau = Activity.Current?.Id;
+            if (maYeuCau == null)
+            {
+                maYeuCau = HttpContext.TraceIdentifier;
+            }
+
+            ErrorViewModel model = new ErrorViewModel();
+            model.RequestId = maYeuCau;
+            return View(model);
         }
     }
 }

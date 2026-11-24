@@ -1,0 +1,22 @@
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel"
+         aria-describedby="logoutModalMessage" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <form class="modal-content bg-white text-dark shadow" asp-controller="Account" asp-action="Logout" method="post">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="logoutModalLabel">
+                        <i class="bi bi-box-arrow-right text-danger me-2" aria-hidden="true"></i>Xác nhận đăng xuất
+                    </h2>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0" id="logoutModalMessage">Bạn muốn đăng xuất?</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Hủy</button>
+                    <button class="btn btn-danger" type="submit">OK</button>
+                </div>
+            </form>
+        </div>
+    </div>
+}

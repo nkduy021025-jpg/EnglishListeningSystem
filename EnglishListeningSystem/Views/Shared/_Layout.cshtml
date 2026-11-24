@@ -3,8 +3,38 @@
     var loginError = TempData["LoginError"];
     var registerError = TempData["RegisterError"];
     var registerSuccess = listeningLanding ? TempData["RegisterSuccess"] : null;
-    var modalToShow = registerError != null ? "registerModal" :
-        loginError != null || registerSuccess != null ? "loginModal" : null;
+    string? instructorPending = null;
+    if (listeningLanding)
+    {
+        instructorPending = TempData["InstructorPending"] as string;
+    }
+
+    string? modalToShow = null;
+    if (registerError != null)
+    {
+        modalToShow = "registerModal";
+    }
+    else if (instructorPending != null)
+    {
+        modalToShow = "instructorPendingModal";
+    }
+    else if (loginError != null || registerSuccess != null)
+    {
+        modalToShow = "loginModal";
+    }
+
+    string? lastUsername = null;
+    if (loginError != null || registerSuccess != null)
+    {
+        lastUsername = TempData["LastUsername"] as string;
+    }
+
+    bool chonGiangVien = TempData["RegVaiTro"] as string == "Instructor";
+    bool chonSinhVien = !chonGiangVien;
+
+    var danhTinh = User.Identity;
+    bool daDangNhap = danhTinh != null && danhTinh.IsAuthenticated;
+    string lopNavbar = listeningLanding ? "listening-nav" : "bg-white border-bottom box-shadow mb-3";
 }
 <!DOCTYPE html>
 <html lang="@(listeningLanding ? "vi" : "en")">
@@ -14,49 +44,30 @@
     <title>@ViewData["Title"] - EnglishListeningSystem</title>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/navigation.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/EnglishListeningSystem.styles.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body class="@(listeningLanding ? "listening-landing" : null)">
     <header>
-        @if (listeningLanding)
-        {
-            <nav class="navbar listening-nav" aria-label="Điều hướng chính">
-                <div class="container">
-                    <a class="navbar-brand" asp-controller="Home" asp-action="Index">EnglishListening</a>
-                    @if (User.Identity?.IsAuthenticated != true)
+        <nav class="navbar @lopNavbar" aria-label="Điều hướng chính">
+            <div class="container gap-2">
+                <a class="navbar-brand mb-0 me-0 fw-semibold" asp-area="" asp-controller="Home" asp-action="Index">EnglishListeningSystem</a>
+                <div class="d-flex flex-wrap align-items-center gap-2 ms-auto">
+                    @if (daDangNhap)
                     {
-                        <button class="btn" type="button" data-bs-toggle="modal" data-bs-target="#loginModal">Đăng nhập</button>
+                        <partial name="_RoleNavigation" />
+                        <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#logoutModal">Đăng xuất</button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#loginModal">Đăng nhập</button>
                     }
                 </div>
-            </nav>
-        }
-        else
-        {
-                <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-                    <div class="container-fluid">
-                        <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">EnglishListeningSystem</a>
-                        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                                aria-expanded="false" aria-label="Toggle navigation">
-                            <span class="navbar-toggler-icon"></span>
-                        </button>
-                        <div class="navbar-collapse collapse d-sm-inline-flex justify-content-end">
-                            <ul class="nav nav-tabs">
-                                <li class="nav-item">
-                                    <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#loginModal" data-bs-whatever="">Login</a>  
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="#">Link</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </nav>
-        }
+            </div>
+        </nav>
     </header>
     <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -65,22 +76,20 @@
                     <h5 class="modal-title" id="loginModalLabel">@(listeningLanding ? "Đăng nhập" : "Login")</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form method="post" asp-action="login" asp-controller="Account">
+                <form method="post" asp-action="Login" asp-controller="Account">
                     <div class="modal-body">
                     
                         @if (loginError != null)
-                                {
-                                    <div class="alert alert-danger py-2" role="alert">
-                                        @loginError
-                                    </div>
-                                }
+                        {
+                            <div class="alert alert-danger py-2" role="alert">@loginError</div>
+                        }
                         @if (registerSuccess != null)
                         {
                             <div class="alert alert-success py-2" role="status">@registerSuccess</div>
                         }
                         <div class="mb-3">
                             <label for="EmailOrUsername" class="col-form-label">@(listeningLanding ? "Tên đăng nhập hoặc email" : "Username or Email:")</label>
-                            <input type="text" class="form-control" id="EmailOrUsername" name="EmailOrUsername" value="@(registerSuccess != null ? TempData["LastUsername"] : null)" />
+                            <input type="text" class="form-control" id="EmailOrUsername" name="EmailOrUsername" value="@lastUsername" />
                         </div>
                         <div class="mb-3">
                             <label for="Password" class="col-form-label">@(listeningLanding ? "Mật khẩu" : "Password:")</label>
@@ -105,49 +114,77 @@
         </div>
     </div>
     <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <form id="registerForm" class="modal-content bg-white text-dark" method="post" asp-action="Register" asp-controller="Account">
                 <div class="modal-header">
                     <h5 class="modal-title" id="registerModalLabel">Đăng ký tài khoản</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form method="post" asp-action="Register" asp-controller="Account">
-                    <div class="modal-body">
-                        @if (registerError != null)
-                        {
-                            <div class="alert alert-danger py-2" role="alert">
-                                @registerError
-                            </div>
-                        }
-                        <div class="mb-3">
-                            <label for="HoTen" class="col-form-label">Họ và tên:</label>
-                            <input type="text" class="form-control" id="HoTen" name="HoTen" value="@TempData["RegHoTen"]" required />
+                <div class="modal-body">
+                    @if (registerError != null)
+                    {
+                        <div id="registerError" class="alert alert-danger py-2" role="alert">
+                            @registerError
                         </div>
-                        <div class="mb-3">
-                            <label for="Username" class="col-form-label">Tên đăng nhập:</label>
-                            <input type="text" class="form-control" id="Username" name="Username" value="@TempData["RegUsername"]" required />
-                        </div>
-                        <div class="mb-3">
-                            <label for="Email" class="col-form-label">Email:</label>
-                            <input type="email" class="form-control" id="Email" name="Email" value="@TempData["RegEmail"]" required />
-                        </div>
-                        <div class="mb-3">
-                            <label for="RegPassword" class="col-form-label">Mật khẩu:</label>
-                            <input type="password" class="form-control" id="RegPassword" name="Password" required />
-                        </div>
-                        <div class="mb-3">
-                            <label for="ConfirmPassword" class="col-form-label">Xác nhận mật khẩu:</label>
-                            <input type="password" class="form-control" id="ConfirmPassword" name="ConfirmPassword" required />
-                        </div>
+                    }
+                    <div class="mb-3">
+                        <label for="VaiTro" class="form-label fw-semibold">Chọn vai trò đăng ký</label>
+                        <select class="form-select" id="VaiTro" name="VaiTro" aria-describedby="vaiTroDangKyHelp" required>
+                            <option value="Student" selected="@chonSinhVien">Sinh viên</option>
+                            <option value="Instructor" selected="@chonGiangVien">Giảng viên</option>
+                        </select>
+                        <div class="form-text" id="vaiTroDangKyHelp">Tài khoản giảng viên cần được quản trị viên phê duyệt.</div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                        <button type="submit" class="btn btn-success">Đăng ký</button>
+                    <div class="mb-3">
+                        <label for="HoTen" class="col-form-label">Họ và tên:</label>
+                        <input type="text" class="form-control" id="HoTen" name="HoTen" value="@TempData["RegHoTen"]" required />
                     </div>
-                </form>
-            </div>
+                    <div class="mb-3">
+                        <label for="Username" class="col-form-label">Tên đăng nhập:</label>
+                        <input type="text" class="form-control" id="Username" name="Username" value="@TempData["RegUsername"]" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Email" class="col-form-label">Email:</label>
+                        <input type="email" class="form-control" id="Email" name="Email" value="@TempData["RegEmail"]" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="RegPassword" class="col-form-label">Mật khẩu:</label>
+                        <input type="password" class="form-control" id="RegPassword" name="Password" required />
+                    </div>
+                    <div class="mb-3">
+                        <label for="ConfirmPassword" class="col-form-label">Xác nhận mật khẩu:</label>
+                        <input type="password" class="form-control" id="ConfirmPassword" name="ConfirmPassword" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal" onclick="huyDangKy()">
+                        <i class="bi bi-x-circle me-1" aria-hidden="true"></i>Hủy
+                    </button>
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-person-plus-fill me-1" aria-hidden="true"></i>Đăng ký
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
+    @if (instructorPending != null)
+    {
+        <div class="modal fade" id="instructorPendingModal" tabindex="-1" aria-labelledby="instructorPendingModalLabel"
+             aria-describedby="instructorPendingMessage" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content bg-white text-dark shadow border-0">
+                    <div class="modal-body text-center p-4 pt-5">
+                        <i class="bi bi-hourglass-split text-warning fs-1" aria-hidden="true"></i>
+                        <h2 class="h5 mt-3 mb-2" id="instructorPendingModalLabel">Yêu cầu đang chờ phê duyệt</h2>
+                        <p class="mb-0" id="instructorPendingMessage">@instructorPending</p>
+                    </div>
+                    <div class="modal-footer justify-content-center border-0 pt-0 pb-4">
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-primary px-4">OK</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
@@ -161,15 +198,35 @@
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function huyDangKy() {
+            var formDangKy = document.getElementById("registerForm");
+            formDangKy.reset();
+
+            // Reset đưa về dữ liệu ban đầu, nên xóa cả các giá trị được điền lại sau lỗi.
+            var cacOInput = formDangKy.querySelectorAll('input:not([type="hidden"])');
+            for (var i = 0; i < cacOInput.length; i++) {
+                cacOInput[i].value = "";
+            }
+            formDangKy.elements["VaiTro"].value = "Student";
+
+            var thongBaoLoi = document.getElementById("registerError");
+            if (thongBaoLoi) {
+                thongBaoLoi.hidden = true;
+            }
+        }
+    </script>
     @if (modalToShow != null)
     {
         <script>
-                document.addEventListener("DOMContentLoaded", function () {
-                    bootstrap.Modal.getOrCreateInstance(document.getElementById('@modalToShow')).show();
-                });
+            document.addEventListener("DOMContentLoaded", function () {
+                var modalElement = document.getElementById('@modalToShow');
+                bootstrap.Modal.getOrCreateInstance(modalElement).show();
+            });
         </script>
     }
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+    <partial name="_LogoutModal" />
 </body>
 </html>
