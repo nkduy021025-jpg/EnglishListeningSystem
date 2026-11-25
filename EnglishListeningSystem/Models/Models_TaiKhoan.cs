@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 
-#nullable disable
-
 namespace EnglishListeningSystem.Models
 {
     public partial class TaiKhoan
@@ -19,11 +17,11 @@ namespace EnglishListeningSystem.Models
         }
 
         public int MaTK { get; set; }
-        public string TenDangNhap { get; set; }
-        public string MatKhau { get; set; }
-        public string HoTen { get; set; }
-        public string Email { get; set; }
-        public string VaiTro { get; set; }
+        public string TenDangNhap { get; set; } = null!;
+        public string MatKhau { get; set; } = null!;
+        public string HoTen { get; set; } = null!;
+        public string? Email { get; set; }
+        public string VaiTro { get; set; } = null!;
         public int DiemTichLuy { get; set; }
         public bool TrangThaiTK { get; set; }
 

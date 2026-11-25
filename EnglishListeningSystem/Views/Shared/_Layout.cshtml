@@ -1,5 +1,6 @@
 @{
     var listeningLanding = ViewData["ListeningLanding"] is true;
+    bool studentProfile = ViewData["StudentProfile"] is true;
     var loginError = TempData["LoginError"];
     var registerError = TempData["RegisterError"];
     var registerSuccess = listeningLanding ? TempData["RegisterSuccess"] : null;
@@ -37,7 +38,7 @@
     string lopNavbar = listeningLanding ? "listening-nav" : "bg-white border-bottom box-shadow mb-3";
 }
 <!DOCTYPE html>
-<html lang="@(listeningLanding ? "vi" : "en")">
+<html lang="@(listeningLanding || studentProfile ? "vi" : "en")">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -50,7 +51,7 @@
     <link rel="stylesheet" href="~/EnglishListeningSystem.styles.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
-<body class="@(listeningLanding ? "listening-landing" : null)">
+<body class="@(listeningLanding ? "listening-landing" : null) @(studentProfile ? "student-profile-page" : null)">
     <header>
         <nav class="navbar @lopNavbar" aria-label="Điều hướng chính">
             <div class="container gap-2">
@@ -145,7 +146,8 @@
                     </div>
                     <div class="mb-3">
                         <label for="Email" class="col-form-label">Email:</label>
-                        <input type="email" class="form-control" id="Email" name="Email" value="@TempData["RegEmail"]" required />
+                        <input type="email" class="form-control" id="Email" name="Email" value="@TempData["RegEmail"]"
+                               autocomplete="email" maxlength="150" required />
                     </div>
                     <div class="mb-3">
                         <label for="RegPassword" class="col-form-label">Mật khẩu:</label>

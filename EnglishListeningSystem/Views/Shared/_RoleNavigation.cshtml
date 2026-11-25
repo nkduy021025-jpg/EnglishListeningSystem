@@ -36,3 +36,18 @@ else if (daDangNhap && User.IsInRole("Instructor"))
         <i class="bi bi-easel me-1" aria-hidden="true"></i>@tenMucGiangVien
     </a>
 }
+
+@if (daDangNhap)
+{
+    string? actionHienTai = ViewContext.RouteData.Values["action"]?.ToString();
+    bool dangOHoSo = string.Equals(controllerHienTai, "Account", StringComparison.OrdinalIgnoreCase)
+        && string.Equals(actionHienTai, "ThongTinCaNhan", StringComparison.OrdinalIgnoreCase);
+    string? lopActive = dangOHoSo ? "active" : null;
+    string? viTriHienTai = dangOHoSo ? "page" : null;
+    string tenHienThi = danhTinh?.Name ?? "Thông tin cá nhân";
+
+    <a class="role-nav-link @lopActive" aria-current="@viTriHienTai" title="Thông tin cá nhân"
+       asp-controller="Account" asp-action="ThongTinCaNhan">
+        <i class="bi bi-person-circle me-1 flex-shrink-0" aria-hidden="true"></i><span class="text-break">@tenHienThi</span>
+    </a>
+}

@@ -29,7 +29,8 @@
 }
 
 .listening-nav,
-.student-header {
+.student-header,
+.student-profile-page .navbar {
     --role-nav-text: #19382f;
     --role-nav-border: #819b89;
     --role-nav-bg: #e4ece3;

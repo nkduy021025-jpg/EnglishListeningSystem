@@ -1,0 +1,167 @@
+@model EnglishListeningSystem.Models.TaiKhoan
+
+@{
+    ViewData["Title"] = "Thông tin cá nhân";
+    if (User.IsInRole("Admin"))
+    {
+        Layout = "~/Views/Shared/_Layout_Admin.cshtml";
+    }
+    else if (User.IsInRole("Instructor"))
+    {
+        Layout = "~/Views/Shared/_Layout_Instructor.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+        ViewData["StudentProfile"] = true;
+    }
+
+    string? infoSuccess = TempData["InfoSuccess"] as string;
+    string? infoError = TempData["InfoError"] as string;
+    string? passwordSuccess = TempData["PasswordSuccess"] as string;
+    string? passwordError = TempData["PasswordError"] as string;
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/account-profile.css" asp-append-version="true" />
+}
+
+<div class="account-profile col-12 col-md-8 col-lg-7 mx-auto">
+    <h1 class="display-6 fw-bold mb-4">Tài khoản của tôi</h1>
+
+    @if (passwordSuccess != null)
+    {
+        <div class="alert alert-success" role="status">@passwordSuccess</div>
+    }
+
+    <section class="card shadow-sm rounded-4" aria-labelledby="profileInfoTitle">
+        <div class="card-body p-3 p-sm-4">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <span class="profile-icon rounded-3"><i class="bi bi-person-vcard" aria-hidden="true"></i></span>
+                <h2 class="h4 fw-semibold mb-0" id="profileInfoTitle">Thông tin cá nhân</h2>
+            </div>
+
+            @if (infoSuccess != null)
+            {
+                <div class="alert alert-success" role="status">@infoSuccess</div>
+            }
+            else if (infoError != null)
+            {
+                <div class="alert alert-danger" role="alert">@infoError</div>
+            }
+
+            <form asp-controller="Account" asp-action="CapNhatThongTin" method="post">
+                <div class="profile-details rounded-3 p-3 mb-4">
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <span class="small">Vai trò</span>
+                        <span class="badge text-bg-primary">@Model.VaiTro</span>
+                        @if (User.IsInRole("Student") || User.IsInRole("student"))
+                        {
+                            <span class="small ms-sm-2">Điểm tích lũy</span>
+                            <span class="badge text-bg-warning">@Model.DiemTichLuy</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="profileFullName">Họ và tên</label>
+                    <input type="text" class="form-control" id="profileFullName" name="hoTen" value="@Model.HoTen"
+                           autocomplete="name" maxlength="100" required />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="profileUsername">Tên đăng nhập</label>
+                    <input type="text" class="form-control" id="profileUsername" name="tenDangNhap" value="@Model.TenDangNhap"
+                           autocomplete="username" maxlength="50" required />
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-semibold" for="profileEmail">Email</label>
+                    <input type="email" class="form-control" id="profileEmail" value="@Model.Email"
+                           aria-describedby="profileEmailHelp" readonly />
+                    <div class="form-text" id="profileEmailHelp">Email đăng ký là cố định và không thể thay đổi.</div>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-check-circle me-1" aria-hidden="true"></i>Lưu thông tin cá nhân
+                    </button>
+                    <button type="button" class="btn btn-warning px-4" id="nutDoiMatKhau"
+                            data-bs-toggle="modal" data-bs-target="#modalDoiMatKhau">
+                        <i class="bi bi-key-fill me-1" aria-hidden="true"></i>Đổi mật khẩu
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+</div>
+
+<div class="modal fade account-password-modal" id="modalDoiMatKhau" tabindex="-1" data-bs-theme="light"
+     aria-labelledby="profilePasswordTitle" aria-describedby="@(passwordError != null ? "profilePasswordError" : null)" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <form class="modal-content rounded-4 shadow-sm" asp-controller="Account" asp-action="DoiMatKhau" method="post">
+            <div class="modal-header px-3 px-sm-4">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="profile-icon rounded-3"><i class="bi bi-shield-lock" aria-hidden="true"></i></span>
+                    <h2 class="modal-title h4 fw-semibold mb-0" id="profilePasswordTitle">Đổi mật khẩu</h2>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body p-3 p-sm-4">
+                @if (passwordError != null)
+                {
+                    <div class="alert alert-danger" id="profilePasswordError" role="alert">@passwordError</div>
+                }
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="profileCurrentPassword">Mật khẩu hiện tại</label>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="profileCurrentPassword" name="matKhauCu"
+                               autocomplete="current-password" required />
+                        <button type="button" class="btn btn-outline-secondary" data-password-toggle
+                                aria-controls="profileCurrentPassword" aria-label="Hiện mật khẩu hiện tại" aria-pressed="false">
+                            <i class="bi bi-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="profileNewPassword">Mật khẩu mới</label>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="profileNewPassword" name="matKhauMoi"
+                               autocomplete="new-password" minlength="6" aria-describedby="profilePasswordHelp" required />
+                        <button type="button" class="btn btn-outline-secondary" data-password-toggle
+                                aria-controls="profileNewPassword" aria-label="Hiện mật khẩu mới" aria-pressed="false">
+                            <i class="bi bi-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <div class="form-text" id="profilePasswordHelp">Ít nhất 6 ký tự.</div>
+                </div>
+                <div>
+                    <label class="form-label fw-semibold" for="profileConfirmPassword">Xác nhận mật khẩu mới</label>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="profileConfirmPassword" name="xacNhanMatKhau"
+                               autocomplete="new-password" required />
+                        <button type="button" class="btn btn-outline-secondary" data-password-toggle
+                                aria-controls="profileConfirmPassword" aria-label="Hiện mật khẩu xác nhận" aria-pressed="false">
+                            <i class="bi bi-eye" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer px-3 px-sm-4">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="submit" class="btn btn-warning">
+                    <i class="bi bi-key me-1" aria-hidden="true"></i>Xác nhận đổi mật khẩu
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/account-profile.js" asp-append-version="true"></script>
+    @if (passwordError != null)
+    {
+        <script>
+            // Mở lại bằng nút trên trang để Bootstrap xử lý cả vị trí focus khi đóng.
+            document.getElementById("nutDoiMatKhau").click();
+        </script>
+    }
+}

@@ -1,0 +1,52 @@
+.account-profile {
+    max-width: 44rem;
+}
+
+:is(.account-profile, .account-password-modal) .profile-icon {
+    display: inline-grid;
+    flex-shrink: 0;
+    width: 2.75rem;
+    height: 2.75rem;
+    place-items: center;
+    background-color: #e7f1ff;
+    color: #084298;
+    font-size: 1.25rem;
+}
+
+.account-profile .profile-details {
+    background-color: var(--bs-tertiary-bg);
+}
+
+.account-profile input[readonly] {
+    background-color: var(--bs-secondary-bg);
+}
+
+.student-profile-page {
+    background-color: #f8f5ee;
+    color: #19382f;
+}
+
+.student-profile-page .account-profile {
+    padding-block: 1.5rem;
+}
+
+.student-profile-page .account-profile .card,
+.student-profile-page .account-password-modal .modal-content {
+    background-color: #fffcf6;
+    border-color: #e4ddd0;
+    color: #19382f;
+}
+
+.student-profile-page :is(.account-profile, .account-password-modal) .profile-icon,
+.student-profile-page .account-profile .profile-details {
+    background-color: #e4ece3;
+    color: #19382f;
+}
+
+.student-profile-page :is(.account-profile, .account-password-modal) .form-control {
+    border-color: #c9c1b2;
+}
+
+.student-profile-page :is(.account-profile, .account-password-modal) .form-control:focus {
+    border-color: #86b7fe;
+}

@@ -19,9 +19,6 @@
                 <partial name="_RoleNavigation" />
                 @if (User.Identity?.IsAuthenticated == true)
                 {
-                    <span class="fw-medium text-break">
-                        <i class="bi bi-person-circle me-1" aria-hidden="true"></i>@User.Identity.Name
-                    </span>
                     <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#logoutModal">Đăng xuất</button>
                 }
             </div>

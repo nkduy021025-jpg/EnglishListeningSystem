@@ -22,7 +22,7 @@ namespace EnglishListeningSystem.Models
                 Directory.CreateDirectory(_thuMuc);
                 string duongDanKhoa = _duongDan + ".lock";
 
-                // Giữ tệp khóa đến khi đăng ký, duyệt hoặc hủy xử lý xong.
+                // Giữ tệp khóa trong lúc đăng ký, đổi tên đăng nhập, duyệt hoặc hủy yêu cầu.
                 for (int lan = 1; ; lan++)
                 {
                     try

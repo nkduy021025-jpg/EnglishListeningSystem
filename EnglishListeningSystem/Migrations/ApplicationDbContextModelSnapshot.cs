@@ -300,7 +300,6 @@ namespace EnglishListeningSystem.Migrations
                         .HasDefaultValue(0);
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("varchar(150)");
 

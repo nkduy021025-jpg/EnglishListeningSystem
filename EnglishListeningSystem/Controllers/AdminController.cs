@@ -98,8 +98,10 @@ namespace EnglishListeningSystem.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
+                string tenSoSanh = yeuCau.TenDangNhap.ToLowerInvariant();
+                string emailSoSanh = yeuCau.Email.ToLowerInvariant();
                 TaiKhoan? tkDaCo = await _context.TaiKhoans.AsNoTracking().FirstOrDefaultAsync(tk =>
-                    tk.TenDangNhap == yeuCau.TenDangNhap || tk.Email == yeuCau.Email);
+                    tk.TenDangNhap.ToLower() == tenSoSanh || (tk.Email != null && tk.Email.ToLower() == emailSoSanh));
                 if (tkDaCo == null)
                 {
                     TaiKhoan tkMoi = new TaiKhoan();

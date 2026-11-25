@@ -49,7 +49,7 @@ namespace EnglishListeningSystem.Models
                 entity.Property(e => e.MatKhau).IsRequired().HasMaxLength(255);
                 entity.Property(e => e.HoTen).IsRequired().HasMaxLength(100);
 
-                entity.Property(e => e.Email).IsRequired().HasMaxLength(150);
+                entity.Property(e => e.Email).IsRequired(false).HasMaxLength(150);
                 entity.HasIndex(e => e.Email).IsUnique();
 
                 entity.Property(e => e.VaiTro).IsRequired().HasMaxLength(20).HasDefaultValue("Student");
