@@ -9,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>();
 builder.Services.AddSingleton<LuuTruYeuCauGiangVien>();
+builder.Services.AddSingleton<KhoAmThanhBaiHoc>();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
 {
     options.LoginPath = "/Home/Index";
@@ -35,6 +36,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     };
 });
 var app = builder.Build();
+app.Services.GetRequiredService<KhoAmThanhBaiHoc>();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

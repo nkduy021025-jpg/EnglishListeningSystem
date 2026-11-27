@@ -11,7 +11,7 @@
     string? viTriHienTai = dangOStudent ? "location" : null;
 
     <a class="role-nav-link @lopActive" aria-current="@viTriHienTai" asp-controller="Student" asp-action="Index">
-        <i class="bi bi-headphones me-1" aria-hidden="true"></i>Khu vực học tập
+        <i class="bi bi-headphones me-1" aria-hidden="true"></i>Learning Hub
     </a>
 }
 else if (daDangNhap && User.IsInRole("Admin"))
@@ -19,7 +19,7 @@ else if (daDangNhap && User.IsInRole("Admin"))
     bool dangOAdmin = string.Equals(controllerHienTai, "Admin", StringComparison.OrdinalIgnoreCase);
     string? lopActive = dangOAdmin ? "active" : null;
     string? viTriHienTai = dangOAdmin ? "location" : null;
-    string tenMucQuanTri = dangOAdmin ? "Quản lý" : "Trang quản trị";
+    string tenMucQuanTri = dangOAdmin ? "Dashboard" : "Admin Dashboard";
 
     <a class="role-nav-link @lopActive" aria-current="@viTriHienTai" asp-controller="Admin" asp-action="Index">
         <i class="bi bi-speedometer2 me-1" aria-hidden="true"></i>@tenMucQuanTri
@@ -30,7 +30,7 @@ else if (daDangNhap && User.IsInRole("Instructor"))
     bool dangOInstructor = string.Equals(controllerHienTai, "Instructor", StringComparison.OrdinalIgnoreCase);
     string? lopActive = dangOInstructor ? "active" : null;
     string? viTriHienTai = dangOInstructor ? "location" : null;
-    string tenMucGiangVien = dangOInstructor ? "Quản lý bài học" : "Kênh giảng viên";
+    string tenMucGiangVien = dangOInstructor ? "Lesson Management" : "Instructor Portal";
 
     <a class="role-nav-link @lopActive" aria-current="@viTriHienTai" asp-controller="Instructor" asp-action="Index">
         <i class="bi bi-easel me-1" aria-hidden="true"></i>@tenMucGiangVien
@@ -44,9 +44,9 @@ else if (daDangNhap && User.IsInRole("Instructor"))
         && string.Equals(actionHienTai, "ThongTinCaNhan", StringComparison.OrdinalIgnoreCase);
     string? lopActive = dangOHoSo ? "active" : null;
     string? viTriHienTai = dangOHoSo ? "page" : null;
-    string tenHienThi = danhTinh?.Name ?? "Thông tin cá nhân";
+    string tenHienThi = danhTinh?.Name ?? "Profile";
 
-    <a class="role-nav-link @lopActive" aria-current="@viTriHienTai" title="Thông tin cá nhân"
+    <a class="role-nav-link @lopActive" aria-current="@viTriHienTai" title="Profile"
        asp-controller="Account" asp-action="ThongTinCaNhan">
         <i class="bi bi-person-circle me-1 flex-shrink-0" aria-hidden="true"></i><span class="text-break">@tenHienThi</span>
     </a>

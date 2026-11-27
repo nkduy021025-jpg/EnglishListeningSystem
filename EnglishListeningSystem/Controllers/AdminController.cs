@@ -30,7 +30,7 @@ namespace EnglishListeningSystem.Controllers
             }
             catch (IOException)
             {
-                TempData["ErrorMessage"] = "Chưa thể đọc danh sách yêu cầu giảng viên. Vui lòng thử lại.";
+                TempData["ErrorMessage"] = "We couldn't load the instructor requests. Please try again.";
             }
 
             ViewBag.DsChoDuyet = dsChoDuyet;
@@ -94,7 +94,7 @@ namespace EnglishListeningSystem.Controllers
                 YeuCauGiangVien? yeuCau = dsYeuCau.Find(item => item.Id == id);
                 if (yeuCau == null)
                 {
-                    TempData["ErrorMessage"] = "Không tìm thấy yêu cầu giảng viên đang chờ phê duyệt.";
+                    TempData["ErrorMessage"] = "This pending instructor request could not be found.";
                     return RedirectToAction(nameof(Index));
                 }
 
@@ -119,28 +119,28 @@ namespace EnglishListeningSystem.Controllers
                     || tkDaCo.TenDangNhap != yeuCau.TenDangNhap || tkDaCo.Email != yeuCau.Email
                     || tkDaCo.MatKhau != yeuCau.MatKhauDaBam)
                 {
-                    TempData["ErrorMessage"] = "Tên đăng nhập hoặc email đã được một tài khoản khác sử dụng.";
+                    TempData["ErrorMessage"] = "Another account already uses this username or email address.";
                     return RedirectToAction(nameof(Index));
                 }
 
                 // Nếu lần duyệt trước đã lưu tài khoản, chỉ cần dọn yêu cầu còn sót.
                 taiKhoanDaLuu = true;
                 _luuTruYeuCau.XoaYeuCau(id);
-                TempData["SuccessMessage"] = "Đã phê duyệt và lưu tài khoản giảng viên vào hệ thống!";
+                TempData["SuccessMessage"] = "The instructor account has been approved and saved.";
             }
             catch (DbUpdateException)
             {
-                TempData["ErrorMessage"] = "Chưa thể lưu tài khoản giảng viên. Yêu cầu vẫn đang chờ phê duyệt.";
+                TempData["ErrorMessage"] = "We couldn't save the instructor account. The request is still pending approval.";
             }
             catch (IOException)
             {
                 if (taiKhoanDaLuu)
                 {
-                    TempData["ErrorMessage"] = "Đã lưu tài khoản nhưng chưa dọn được yêu cầu. Hãy thử duyệt lại.";
+                    TempData["ErrorMessage"] = "The account was saved, but the request is still pending. Please try approving it again.";
                 }
                 else
                 {
-                    TempData["ErrorMessage"] = "Chưa thể đọc yêu cầu giảng viên. Vui lòng thử lại.";
+                    TempData["ErrorMessage"] = "We couldn't load this instructor request. Please try again.";
                 }
             }
             return RedirectToAction(nameof(Index));
@@ -156,16 +156,16 @@ namespace EnglishListeningSystem.Controllers
                 bool daXoa = _luuTruYeuCau.XoaYeuCau(id);
                 if (daXoa)
                 {
-                    TempData["SuccessMessage"] = "Đã hủy yêu cầu đăng ký tài khoản giảng viên!";
+                    TempData["SuccessMessage"] = "The instructor registration request has been rejected.";
                 }
                 else
                 {
-                    TempData["ErrorMessage"] = "Không tìm thấy yêu cầu giảng viên đang chờ phê duyệt.";
+                    TempData["ErrorMessage"] = "This pending instructor request could not be found.";
                 }
             }
             catch (IOException)
             {
-                TempData["ErrorMessage"] = "Chưa thể hủy yêu cầu giảng viên. Vui lòng thử lại.";
+                TempData["ErrorMessage"] = "We couldn't reject this instructor request. Please try again.";
             }
             return RedirectToAction(nameof(Index));
         }
@@ -198,11 +198,11 @@ namespace EnglishListeningSystem.Controllers
 
             if (hoatDong)
             {
-                TempData["SuccessMessage"] = "Đã mở khóa tài khoản thành công!";
+                TempData["SuccessMessage"] = "The account has been unlocked.";
             }
             else
             {
-                TempData["SuccessMessage"] = "Đã khóa tài khoản thành công!";
+                TempData["SuccessMessage"] = "The account has been locked.";
             }
 
             return RedirectToAction(nameof(Index));

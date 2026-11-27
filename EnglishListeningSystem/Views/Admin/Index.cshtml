@@ -3,20 +3,20 @@
 
 @{
     Layout = "~/Views/Shared/_Layout_Admin.cshtml";
-    ViewData["Title"] = "Quản trị hệ thống";
+    ViewData["Title"] = "Admin Dashboard";
     var thongKeBaiHoc = (IReadOnlyList<ThongKeBaiHoc>)ViewBag.ThongKeBaiHoc;
     IReadOnlyList<YeuCauGiangVien> dsChoDuyet = (IReadOnlyList<YeuCauGiangVien>)ViewBag.DsChoDuyet;
     int soLuongChoDuyet = (int)ViewBag.SoLuongChoDuyet;
     string? thongBaoLoi = TempData["ErrorMessage"] as string;
     var thongKeHocVien = new[]
     {
-        (Nhan: "Tổng số học viên", GiaTri: (int)ViewBag.TongHocVien, Mau: "text-primary-emphasis"),
-        (Nhan: "Đang hoạt động", GiaTri: (int)ViewBag.HocVienHoatDong, Mau: "text-success-emphasis"),
-        (Nhan: "Đang bị khóa", GiaTri: (int)ViewBag.HocVienBiKhoa, Mau: "text-danger-emphasis")
+        (Nhan: "Total Students", GiaTri: (int)ViewBag.TongHocVien, Mau: "text-primary-emphasis"),
+        (Nhan: "Active", GiaTri: (int)ViewBag.HocVienHoatDong, Mau: "text-success-emphasis"),
+        (Nhan: "Locked", GiaTri: (int)ViewBag.HocVienBiKhoa, Mau: "text-danger-emphasis")
     };
 }
 
-<h1 class="h2 fw-semibold mb-4">Quản trị hệ thống</h1>
+<h1 class="h2 fw-semibold mb-4">Admin Dashboard</h1>
 
 @if (TempData["SuccessMessage"] is string thongBao)
 {
@@ -33,15 +33,15 @@
                 data-bs-toggle="collapse" data-bs-target="#thongBaoPheDuyet"
                 aria-expanded="false" aria-controls="thongBaoPheDuyet">
             <i class="bi bi-bell-fill text-primary" aria-hidden="true"></i>
-            <span>Thông báo phê duyệt</span>
-            <span class="badge rounded-pill text-bg-danger" aria-label="@soLuongChoDuyet yêu cầu đang chờ">@soLuongChoDuyet</span>
+            <span>Pending Instructor Requests</span>
+            <span class="badge rounded-pill text-bg-danger" aria-label="Pending requests: @soLuongChoDuyet">@soLuongChoDuyet</span>
             <i class="bi bi-chevron-down ms-auto" aria-hidden="true"></i>
         </button>
     </h2>
     <div class="collapse" id="thongBaoPheDuyet">
         @if (dsChoDuyet.Count == 0)
         {
-            <p class="card-body text-body-secondary border-top mb-0">Không có thông báo yêu cầu phê duyệt mới.</p>
+            <p class="card-body text-body-secondary border-top mb-0">There are no pending instructor requests.</p>
         }
         else
         {
@@ -66,17 +66,17 @@
     </div>
 </section>
 
-<ul class="nav nav-tabs gap-1 mb-4" role="tablist" aria-label="Chức năng quản trị">
+<ul class="nav nav-tabs gap-1 mb-4" role="tablist" aria-label="Admin dashboard tabs">
     <li class="nav-item" role="presentation">
         <button class="nav-link active" id="tabHocVien" type="button" role="tab" data-bs-toggle="tab"
                 data-bs-target="#mucHocVien" aria-controls="mucHocVien" aria-selected="true">
-            <i class="bi bi-people me-1" aria-hidden="true"></i> Thống kê &amp; Quản lý tài khoản học viên
+            <i class="bi bi-people me-1" aria-hidden="true"></i> Student Accounts &amp; Statistics
         </button>
     </li>
     <li class="nav-item" role="presentation">
         <button class="nav-link" id="tabBaiHoc" type="button" role="tab" data-bs-toggle="tab"
                 data-bs-target="#mucBaiHoc" aria-controls="mucBaiHoc" aria-selected="false">
-            <i class="bi bi-bar-chart me-1" aria-hidden="true"></i> Thống kê số lượng học &amp; Bài học được nghe nhiều
+            <i class="bi bi-bar-chart me-1" aria-hidden="true"></i> Lesson Activity &amp; Rankings
         </button>
     </li>
 </ul>
@@ -99,24 +99,24 @@
 
         <div class="card shadow-sm">
             <div class="card-body">
-                <h2 class="h5 mb-3" id="tieuDeHocVien">Danh sách tài khoản học viên</h2>
+                <h2 class="h5 mb-3" id="tieuDeHocVien">Student Accounts</h2>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0" aria-labelledby="tieuDeHocVien">
                         <thead class="table-light">
                             <tr>
-                                <th scope="col" class="text-nowrap">Mã TK</th>
-                                <th scope="col">Họ tên</th>
-                                <th scope="col">Tên đăng nhập</th>
+                                <th scope="col" class="text-nowrap">Account ID</th>
+                                <th scope="col">Full Name</th>
+                                <th scope="col">Username</th>
                                 <th scope="col">Email</th>
-                                <th scope="col" class="text-end">Điểm tích lũy</th>
-                                <th scope="col">Trạng thái</th>
-                                <th scope="col">Thao tác</th>
+                                <th scope="col" class="text-end">Total Points</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             @if (!Model.Any())
                             {
-                                <tr><td colspan="7" class="text-center text-body-secondary py-4">Chưa có tài khoản học viên.</td></tr>
+                                <tr><td colspan="7" class="text-center text-body-secondary py-4">There are no student accounts yet.</td></tr>
                             }
                             @foreach (var item in Model)
                             {
@@ -129,36 +129,36 @@
                                     <td>
                                         @if (item.TrangThaiTK)
                                         {
-                                            <span class="badge text-bg-success">Đang hoạt động</span>
+                                            <span class="badge text-bg-success">Active</span>
                                         }
                                         else
                                         {
-                                            <span class="badge text-bg-danger">Đang bị khóa</span>
+                                            <span class="badge text-bg-danger">Locked</span>
                                         }
                                     </td>
                                     <td>
                                         <div class="d-flex gap-2">
                                             @if (item.TrangThaiTK)
                                             {
-                                                <button class="btn btn-warning btn-sm" type="button" title="Khóa tài khoản"
-                                                        aria-label="Khóa tài khoản @item.TenDangNhap" data-bs-toggle="modal"
+                                                <button class="btn btn-warning btn-sm" type="button" title="Lock account"
+                                                        aria-label="Lock account @item.TenDangNhap" data-bs-toggle="modal"
                                                         data-bs-target="#modalKhoaTaiKhoan" data-ma-tk="@item.MaTK"
                                                         data-ho-ten="@item.HoTen" data-ten-dang-nhap="@item.TenDangNhap" data-email="@item.Email">
                                                     <i class="bi bi-lock-fill" aria-hidden="true"></i>
                                                 </button>
-                                                <button class="btn btn-secondary btn-sm opacity-25" type="button" aria-label="Mở khóa tài khoản" disabled>
+                                                <button class="btn btn-secondary btn-sm opacity-25" type="button" aria-label="Unlock account" disabled>
                                                     <i class="bi bi-unlock-fill" aria-hidden="true"></i>
                                                 </button>
                                             }
                                             else
                                             {
-                                                <button class="btn btn-secondary btn-sm opacity-25" type="button" aria-label="Khóa tài khoản" disabled>
+                                                <button class="btn btn-secondary btn-sm opacity-25" type="button" aria-label="Lock account" disabled>
                                                     <i class="bi bi-lock-fill" aria-hidden="true"></i>
                                                 </button>
                                                 <form asp-controller="Admin" asp-action="MoKhoaTaiKhoan" method="post">
                                                     <input type="hidden" name="id" value="@item.MaTK" />
-                                                    <button class="btn btn-success btn-sm" type="submit" title="Mở khóa tài khoản"
-                                                            aria-label="Mở khóa tài khoản @item.TenDangNhap">
+                                                    <button class="btn btn-success btn-sm" type="submit" title="Unlock account"
+                                                            aria-label="Unlock account @item.TenDangNhap">
                                                         <i class="bi bi-unlock-fill" aria-hidden="true"></i>
                                                     </button>
                                                 </form>
@@ -179,7 +179,7 @@
             <div class="col-sm-6">
                 <div class="card h-100 shadow-sm">
                     <div class="card-body">
-                        <h2 class="h6 text-body-secondary">Tổng số bài học</h2>
+                        <h2 class="h6 text-body-secondary">Total Lessons</h2>
                         <p class="fs-2 fw-semibold mb-0 text-primary-emphasis">@(((int)ViewBag.TongBaiHoc).ToString("N0"))</p>
                     </div>
                 </div>
@@ -187,7 +187,7 @@
             <div class="col-sm-6">
                 <div class="card h-100 shadow-sm">
                     <div class="card-body">
-                        <h2 class="h6 text-body-secondary">Tổng lượt tham gia học</h2>
+                        <h2 class="h6 text-body-secondary">Total Lesson Starts</h2>
                         <p class="fs-2 fw-semibold mb-0 text-primary-emphasis">@(((long)ViewBag.TongLuotThamGia).ToString("N0"))</p>
                     </div>
                 </div>
@@ -196,23 +196,23 @@
 
         <div class="card shadow-sm">
             <div class="card-body">
-                <h2 class="h5 mb-3" id="tieuDeBaiHoc">Xếp hạng bài học theo lượt tham gia</h2>
+                <h2 class="h5 mb-3" id="tieuDeBaiHoc">Lessons Ranked by Student Participation</h2>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0" aria-labelledby="tieuDeBaiHoc">
                         <thead class="table-light">
                             <tr>
-                                <th scope="col">Hạng</th>
-                                <th scope="col">Tên bài học</th>
-                                <th scope="col">Danh mục</th>
-                                <th scope="col">Cấp độ</th>
-                                <th scope="col" class="text-end">Số học viên đã học</th>
-                                <th scope="col" class="text-end">Tổng lượt luyện nghe</th>
+                                <th scope="col">Rank</th>
+                                <th scope="col">Lesson Title</th>
+                                <th scope="col">Topic</th>
+                                <th scope="col">Level</th>
+                                <th scope="col" class="text-end">Participating Students</th>
+                                <th scope="col" class="text-end">Total Listening Attempts</th>
                             </tr>
                         </thead>
                         <tbody>
                             @if (thongKeBaiHoc.Count == 0)
                             {
-                                <tr><td colspan="6" class="text-center text-body-secondary py-4">Chưa có bài học.</td></tr>
+                                <tr><td colspan="6" class="text-center text-body-secondary py-4">There are no lessons yet.</td></tr>
                             }
                             @for (var i = 0; i < thongKeBaiHoc.Count; i++)
                             {
@@ -238,24 +238,24 @@
     <div class="modal-dialog modal-dialog-centered">
         <form class="modal-content" asp-controller="Admin" asp-action="KhoaTaiKhoan" method="post">
             <div class="modal-header">
-                <h2 class="modal-title fs-5" id="tieuDeModalKhoa">Xác nhận khóa tài khoản</h2>
+                <h2 class="modal-title fs-5" id="tieuDeModalKhoa">Confirm Account Lock</h2>
             </div>
             <div class="modal-body">
                 <input type="hidden" name="id" />
-                <p>Bạn có muốn khóa tài khoản học viên này?</p>
+                <p>Are you sure you want to lock this student's account?</p>
                 <dl class="row mb-0">
-                    <dt class="col-5">Mã TK</dt>
+                    <dt class="col-5">Account ID</dt>
                     <dd class="col-7" data-thong-tin="maTk"></dd>
-                    <dt class="col-5">Họ tên</dt>
+                    <dt class="col-5">Full Name</dt>
                     <dd class="col-7 text-break" data-thong-tin="hoTen"></dd>
-                    <dt class="col-5">Tên đăng nhập</dt>
+                    <dt class="col-5">Username</dt>
                     <dd class="col-7 text-break" data-thong-tin="tenDangNhap"></dd>
                     <dt class="col-5">Email</dt>
                     <dd class="col-7 text-break" data-thong-tin="email"></dd>
                 </dl>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Hủy</button>
+                <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancel</button>
                 <button class="btn btn-danger" type="submit">OK</button>
             </div>
         </form>
@@ -266,30 +266,30 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content bg-white text-dark">
             <div class="modal-header">
-                <h2 class="modal-title fs-5" id="tieuDeModalDuyet">Yêu cầu đăng ký giảng viên</h2>
-                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                <h2 class="modal-title fs-5" id="tieuDeModalDuyet">Instructor Registration Request</h2>
+                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <dl class="row mb-0">
-                    <dt class="col-5">Họ tên</dt>
+                    <dt class="col-5">Full Name</dt>
                     <dd class="col-7 text-break" data-thong-tin="hoTen"></dd>
-                    <dt class="col-5">Tên đăng nhập</dt>
+                    <dt class="col-5">Username</dt>
                     <dd class="col-7 text-break" data-thong-tin="tenDangNhap"></dd>
                     <dt class="col-5">Email</dt>
                     <dd class="col-7 text-break" data-thong-tin="email"></dd>
-                    <dt class="col-5 mb-0">Ngày gửi</dt>
+                    <dt class="col-5 mb-0">Date Submitted</dt>
                     <dd class="col-7 mb-0" data-thong-tin="ngayGui"></dd>
                 </dl>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline-danger" id="nutKhongDuyetGiangVien" type="button"
                         data-bs-toggle="modal" data-bs-target="#modalXacNhanHuyYeuCau">
-                    <i class="bi bi-x-circle me-1" aria-hidden="true"></i>Không duyệt
+                    <i class="bi bi-x-circle me-1" aria-hidden="true"></i>Reject
                 </button>
                 <form asp-action="DuyetGiangVien" asp-controller="Admin" method="post">
                     <input type="hidden" name="id" />
                     <button class="btn btn-success" type="submit">
-                        <i class="bi bi-check-circle me-1" aria-hidden="true"></i>Duyệt
+                        <i class="bi bi-check-circle me-1" aria-hidden="true"></i>Approve
                     </button>
                 </form>
             </div>
@@ -302,17 +302,17 @@
     <div class="modal-dialog modal-dialog-centered">
         <form class="modal-content bg-white text-dark" asp-action="HuyYeuCauGiangVien" asp-controller="Admin" method="post">
             <div class="modal-header">
-                <h2 class="modal-title fs-5" id="tieuDeModalHuyYeuCau">Xác nhận hủy yêu cầu</h2>
+                <h2 class="modal-title fs-5" id="tieuDeModalHuyYeuCau">Confirm Rejection</h2>
             </div>
             <div class="modal-body">
                 <input type="hidden" name="id" />
                 <p class="mb-0" id="noiDungModalHuyYeuCau">
-                    Bạn muốn hủy yêu cầu đăng ký của <strong class="text-break" data-thong-tin="hoTen"></strong>?
+                    Are you sure you want to reject the registration request from <strong class="text-break" data-thong-tin="hoTen"></strong>?
                 </p>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancel</button>
-                <button class="btn btn-danger" type="submit">Hủy</button>
+                <button class="btn btn-danger" type="submit">Reject</button>
             </div>
         </form>
     </div>

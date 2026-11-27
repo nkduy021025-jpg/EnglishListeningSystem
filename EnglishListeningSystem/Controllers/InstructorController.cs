@@ -1,9 +1,11 @@
+using System.Data;
 using System.Data.Common;
 using System.Security.Claims;
 using EnglishListeningSystem.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace EnglishListeningSystem.Controllers
 {
@@ -11,10 +13,12 @@ namespace EnglishListeningSystem.Controllers
     public class InstructorController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly KhoAmThanhBaiHoc _khoAmThanh;
 
-        public InstructorController(ApplicationDbContext context)
+        public InstructorController(ApplicationDbContext context, KhoAmThanhBaiHoc khoAmThanh)
         {
             _context = context;
+            _khoAmThanh = khoAmThanh;
         }
 
         [HttpGet]
@@ -53,7 +57,9 @@ namespace EnglishListeningSystem.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ThemBaiHoc([Bind("TenBH,MaDM,CapDo,AudioUrl")] BaiHoc model)
+        [RequestSizeLimit(KhoAmThanhBaiHoc.GioiHanYeuCau)]
+        public async Task<IActionResult> ThemBaiHoc([Bind("TenBH,MaDM,CapDo,AudioUrl")] BaiHoc model,
+            IFormFile? audioFile, IFormFile? srtFile)
         {
             string? loi = await KiemTraBaiHoc(model);
             if (loi != null)
@@ -66,21 +72,53 @@ namespace EnglishListeningSystem.Controllers
             baiHoc.TenBH = model.TenBH.Trim();
             baiHoc.MaDM = model.MaDM;
             baiHoc.CapDo = model.CapDo.Trim();
-            baiHoc.AudioUrl = model.AudioUrl?.Trim();
             if (int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int maTK) && maTK > 0)
             {
                 baiHoc.MaTK = maTK;
             }
 
-            _context.BaiHocs.Add(baiHoc);
+            string? fileDaTai = null;
+            bool dangCommit = false;
             try
             {
+                string? tenFile = KiemTraTenTep(model.AudioUrl, audioFile);
+                if (audioFile != null || srtFile != null)
+                {
+                    (fileDaTai, List<CauChep>? cacCau) = await _khoAmThanh.LuuTepAsync(
+                        audioFile, srtFile, tenFile, HttpContext.RequestAborted);
+                    tenFile = fileDaTai;
+                    if (cacCau != null)
+                    {
+                        baiHoc.CauCheps = cacCau;
+                    }
+                }
+
+                baiHoc.AudioUrl = tenFile;
+                await using IDbContextTransaction giaoDich = await _context.Database.BeginTransactionAsync();
+                _context.BaiHocs.Add(baiHoc);
                 await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = "Đã thêm bài học.";
+                dangCommit = true;
+                await giaoDich.CommitAsync();
+                TempData["SuccessMessage"] = "The lesson has been added.";
             }
-            catch (DbUpdateException)
+            catch (InvalidDataException loiTep)
             {
-                TempData["ErrorMessage"] = "Không thể thêm bài học. Hãy kiểm tra lại chủ đề đã chọn.";
+                TempData["ErrorMessage"] = loiTep.Message;
+            }
+            catch (Exception loiLuu) when (loiLuu is IOException || loiLuu is UnauthorizedAccessException)
+            {
+                TempData["ErrorMessage"] = "We couldn't save the lesson files. Please try again.";
+            }
+            catch (Exception loiLuu) when (loiLuu is DbUpdateException || loiLuu is DbException)
+            {
+                TempData["ErrorMessage"] = "We couldn't add the lesson. Check the selected topic and try again.";
+            }
+            finally
+            {
+                if (!dangCommit && fileDaTai != null)
+                {
+                    _khoAmThanh.XoaTepDaTaiLen(fileDaTai);
+                }
             }
 
             return RedirectToAction(nameof(Index));
@@ -88,7 +126,9 @@ namespace EnglishListeningSystem.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SuaBaiHoc([Bind("MaBH,TenBH,MaDM,CapDo,AudioUrl")] BaiHoc model)
+        [RequestSizeLimit(KhoAmThanhBaiHoc.GioiHanYeuCau)]
+        public async Task<IActionResult> SuaBaiHoc([Bind("MaBH,TenBH,MaDM,CapDo,AudioUrl")] BaiHoc model,
+            IFormFile? audioFile, IFormFile? srtFile)
         {
             string? loi = await KiemTraBaiHoc(model);
             if (loi != null)
@@ -97,25 +137,90 @@ namespace EnglishListeningSystem.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            BaiHoc? baiHoc = await _context.BaiHocs.FindAsync(model.MaBH);
-            if (baiHoc == null)
+            BaiHoc? baiHocHienTai = await _context.BaiHocs.AsNoTracking()
+                .SingleOrDefaultAsync(bh => bh.MaBH == model.MaBH);
+            if (baiHocHienTai == null)
             {
-                TempData["ErrorMessage"] = "Không tìm thấy bài học cần sửa.";
+                TempData["ErrorMessage"] = "The lesson you tried to edit could not be found.";
                 return RedirectToAction(nameof(Index));
             }
 
-            baiHoc.TenBH = model.TenBH.Trim();
-            baiHoc.MaDM = model.MaDM;
-            baiHoc.CapDo = model.CapDo.Trim();
-            baiHoc.AudioUrl = model.AudioUrl?.Trim();
+            string? fileDaTai = null;
+            bool dangCommit = false;
             try
             {
+                string? tenFile = KiemTraTenTep(model.AudioUrl, audioFile);
+                bool dungAudioHienTai = audioFile == null && srtFile != null && tenFile == null;
+                List<CauChep>? cacCau = null;
+                if (audioFile != null || srtFile != null)
+                {
+                    (fileDaTai, cacCau) = await _khoAmThanh.LuuTepAsync(audioFile, srtFile,
+                        tenFile ?? baiHocHienTai.AudioUrl, HttpContext.RequestAborted);
+                    tenFile = fileDaTai;
+                }
+
+                await using IDbContextTransaction giaoDich =
+                    await _context.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted);
+                List<BaiHoc> dsBai = await _context.BaiHocs.FromSql(
+                    $"SELECT * FROM `BaiHoc` WHERE `MaBH` = {model.MaBH} FOR UPDATE").ToListAsync();
+                BaiHoc? baiHoc = dsBai.SingleOrDefault();
+                if (baiHoc == null || (dungAudioHienTai && baiHoc.AudioUrl != baiHocHienTai.AudioUrl))
+                {
+                    TempData["ErrorMessage"] = "The lesson or its audio has changed. Reload the page and try again.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                if (cacCau != null)
+                {
+                    // Không thay phụ đề sau khi học viên đã làm bài.
+                    IQueryable<CauChep> cauHoiCu = _context.CauCheps.Where(cau => cau.MaBH == baiHoc.MaBH);
+                    bool coLuotLam = await cauHoiCu.AnyAsync(cau => cau.LamBais.Any());
+                    bool coTienDo = await _context.TienDoBaiHocs.AnyAsync(tienDo =>
+                        tienDo.MaBH == baiHoc.MaBH && tienDo.MucDoHoanThanh > 0);
+                    if (coLuotLam || coTienDo)
+                    {
+                        TempData["ErrorMessage"] = "The subtitles cannot be replaced after students have attempted this lesson.";
+                        return RedirectToAction(nameof(Index));
+                    }
+
+                    await cauHoiCu.ExecuteDeleteAsync();
+                    foreach (CauChep cau in cacCau)
+                    {
+                        cau.MaBH = baiHoc.MaBH;
+                    }
+                    _context.CauCheps.AddRange(cacCau);
+                }
+
+                baiHoc.TenBH = model.TenBH.Trim();
+                baiHoc.MaDM = model.MaDM;
+                baiHoc.CapDo = model.CapDo.Trim();
+                if (tenFile != null)
+                {
+                    baiHoc.AudioUrl = tenFile;
+                }
                 await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = "Đã cập nhật bài học.";
+                dangCommit = true;
+                await giaoDich.CommitAsync();
+                TempData["SuccessMessage"] = "The lesson has been updated.";
             }
-            catch (DbUpdateException)
+            catch (InvalidDataException loiTep)
             {
-                TempData["ErrorMessage"] = "Không thể lưu bài học. Bài học hoặc chủ đề có thể đã thay đổi.";
+                TempData["ErrorMessage"] = loiTep.Message;
+            }
+            catch (Exception loiLuu) when (loiLuu is IOException || loiLuu is UnauthorizedAccessException)
+            {
+                TempData["ErrorMessage"] = "We couldn't save the lesson files. Please try again.";
+            }
+            catch (Exception loiLuu) when (loiLuu is DbUpdateException || loiLuu is DbException)
+            {
+                TempData["ErrorMessage"] = "We couldn't save the lesson. The lesson or topic may have changed.";
+            }
+            finally
+            {
+                if (!dangCommit && fileDaTai != null)
+                {
+                    _khoAmThanh.XoaTepDaTaiLen(fileDaTai);
+                }
             }
 
             return RedirectToAction(nameof(Index));
@@ -137,20 +242,20 @@ namespace EnglishListeningSystem.Controllers
                 int soBaiDaXoa = await baiHocChuaCoDuLieu.ExecuteDeleteAsync();
                 if (soBaiDaXoa > 0)
                 {
-                    TempData["SuccessMessage"] = "Đã xóa bài học.";
+                    TempData["SuccessMessage"] = "The lesson has been deleted.";
                 }
                 else if (await baiHocTheoMa.AnyAsync())
                 {
-                    TempData["ErrorMessage"] = "Bài học còn câu hỏi hoặc dữ liệu học viên nên chưa thể xóa.";
+                    TempData["ErrorMessage"] = "You can only delete lessons with no questions or student activity.";
                 }
                 else
                 {
-                    TempData["ErrorMessage"] = "Không tìm thấy bài học cần xóa.";
+                    TempData["ErrorMessage"] = "The lesson you tried to delete could not be found.";
                 }
             }
             catch (DbException)
             {
-                TempData["ErrorMessage"] = "Không thể xóa bài học. Hãy kiểm tra dữ liệu liên quan.";
+                TempData["ErrorMessage"] = "We couldn't delete the lesson. Check for related records and try again.";
             }
 
             return RedirectToAction(nameof(Index));
@@ -193,7 +298,7 @@ namespace EnglishListeningSystem.Controllers
             if (!ModelState.IsValid || model.ThuTuCau < 1 || string.IsNullOrWhiteSpace(model.NoiDungChuan)
                 || !thoiGianHopLe || goiYQuaDai)
             {
-                TempData["ErrorMessage"] = "Kiểm tra lại thứ tự, nội dung, gợi ý và khoảng thời gian của câu hỏi.";
+                TempData["ErrorMessage"] = "Check the question's order, answer, hint, and time range.";
                 return RedirectToAction(nameof(DanhSachCauHoi), new { maBH = model.MaBH });
             }
 
@@ -205,11 +310,11 @@ namespace EnglishListeningSystem.Controllers
             try
             {
                 await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = "Đã cập nhật câu hỏi.";
+                TempData["SuccessMessage"] = "The question has been updated.";
             }
             catch (DbUpdateException)
             {
-                TempData["ErrorMessage"] = "Không thể lưu câu hỏi. Câu hỏi có thể đã thay đổi.";
+                TempData["ErrorMessage"] = "We couldn't save the question. It may have changed.";
             }
 
             return RedirectToAction(nameof(DanhSachCauHoi), new { maBH = model.MaBH });
@@ -225,11 +330,11 @@ namespace EnglishListeningSystem.Controllers
                 int soCauDaXoa = await cauHoiTheoMa.Where(cau => !cau.LamBais.Any()).ExecuteDeleteAsync();
                 if (soCauDaXoa > 0)
                 {
-                    TempData["SuccessMessage"] = "Đã xóa câu hỏi.";
+                    TempData["SuccessMessage"] = "The question has been deleted.";
                 }
                 else if (await cauHoiTheoMa.AnyAsync())
                 {
-                    TempData["ErrorMessage"] = "Câu hỏi đã có lượt làm nên chưa thể xóa.";
+                    TempData["ErrorMessage"] = "You can only delete questions that students haven't attempted.";
                 }
                 else
                 {
@@ -238,7 +343,7 @@ namespace EnglishListeningSystem.Controllers
             }
             catch (DbException)
             {
-                TempData["ErrorMessage"] = "Không thể xóa câu hỏi. Hãy kiểm tra dữ liệu liên quan.";
+                TempData["ErrorMessage"] = "We couldn't delete the question. Check for related records and try again.";
             }
 
             return RedirectToAction(nameof(DanhSachCauHoi), new { maBH });
@@ -249,20 +354,30 @@ namespace EnglishListeningSystem.Controllers
             if (!ModelState.IsValid || string.IsNullOrWhiteSpace(model.TenBH) || model.TenBH.Trim().Length > 200
                 || string.IsNullOrWhiteSpace(model.CapDo) || model.CapDo.Trim().Length > 50)
             {
-                return "Nhập tên bài học tối đa 200 ký tự và cấp độ tối đa 50 ký tự.";
-            }
-
-            if (!string.IsNullOrWhiteSpace(model.AudioUrl) && model.AudioUrl.Trim().Length > 255)
-            {
-                return "Đường dẫn audio tối đa 255 ký tự.";
+                return "Enter a lesson title of up to 200 characters and a level of up to 50 characters.";
             }
 
             if (model.MaDM < 1 || !await _context.DanhMucs.AnyAsync(dm => dm.MaDM == model.MaDM))
             {
-                return "Hãy chọn một chủ đề có trong hệ thống.";
+                return "Select an existing topic.";
             }
 
             return null;
+        }
+
+        private string? KiemTraTenTep(string? tenFile, IFormFile? audioFile)
+        {
+            if (audioFile != null || string.IsNullOrWhiteSpace(tenFile))
+            {
+                return null;
+            }
+
+            tenFile = tenFile.Trim();
+            if (_khoAmThanh.TimFileMp3(tenFile) == null)
+            {
+                throw new InvalidDataException("Enter the name of an MP3 file already in the audio folder.");
+            }
+            return tenFile;
         }
     }
 }

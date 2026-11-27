@@ -250,7 +250,7 @@
 
 .practice-panel {
     padding: clamp(1rem, 4vw, 2rem);
-    border: 1px solid #dee2e6;
+    border: 1px solid #e4ddd0;
     border-top: 0;
     border-radius: 0 0 1rem 1rem;
 }
@@ -274,6 +274,45 @@
 
 .practice-form {
     max-width: 35rem;
+}
+
+.practice-form .form-control {
+    background: #fffcf6;
+    border-color: #e4ddd0;
+    color: #19382f;
+}
+
+.practice-navigation,
+.practice-answer,
+.practice-completed {
+    background: #e4ece3;
+    color: #19382f;
+}
+
+.lesson-filter-button:hover {
+    background: #254d40;
+}
+
+.practice-completed[hidden],
+.transcript-words[hidden],
+#transcript-result[hidden] {
+    display: none !important;
+}
+
+.transcript-word {
+    max-width: 100%;
+    padding: .25rem .5rem;
+    border: 1px solid currentColor;
+    border-radius: .4rem;
+    overflow-wrap: anywhere;
+}
+
+.transcript-word-correct {
+    color: #a6e3b7;
+}
+
+.transcript-word-error {
+    color: #ffb4b4;
 }
 
 .practice-transcript {

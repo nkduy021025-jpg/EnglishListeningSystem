@@ -38,7 +38,7 @@
     string lopNavbar = listeningLanding ? "listening-nav" : "bg-white border-bottom box-shadow mb-3";
 }
 <!DOCTYPE html>
-<html lang="@(listeningLanding || studentProfile ? "vi" : "en")">
+<html lang="@(listeningLanding || studentProfile ? "en" : "en")">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -53,18 +53,18 @@
 </head>
 <body class="@(listeningLanding ? "listening-landing" : null) @(studentProfile ? "student-profile-page" : null)">
     <header>
-        <nav class="navbar @lopNavbar" aria-label="Điều hướng chính">
+        <nav class="navbar @lopNavbar" aria-label="Main navigation">
             <div class="container gap-2">
                 <a class="navbar-brand mb-0 me-0 fw-semibold" asp-area="" asp-controller="Home" asp-action="Index">EnglishListeningSystem</a>
                 <div class="d-flex flex-wrap align-items-center gap-2 ms-auto">
                     @if (daDangNhap)
                     {
                         <partial name="_RoleNavigation" />
-                        <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#logoutModal">Đăng xuất</button>
+                        <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#logoutModal">Logout</button>
                     }
                     else
                     {
-                        <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#loginModal">Đăng nhập</button>
+                        <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button>
                     }
                 </div>
             </div>
@@ -74,7 +74,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="loginModalLabel">@(listeningLanding ? "Đăng nhập" : "Login")</h5>
+                    <h5 class="modal-title" id="loginModalLabel">@(listeningLanding ? "Login" : "Login")</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form method="post" asp-action="Login" asp-controller="Account">
@@ -89,26 +89,26 @@
                             <div class="alert alert-success py-2" role="status">@registerSuccess</div>
                         }
                         <div class="mb-3">
-                            <label for="EmailOrUsername" class="col-form-label">@(listeningLanding ? "Tên đăng nhập hoặc email" : "Username or Email:")</label>
+                            <label for="EmailOrUsername" class="col-form-label">@(listeningLanding ? "Username or Email" : "Username or Email")</label>
                             <input type="text" class="form-control" id="EmailOrUsername" name="EmailOrUsername" value="@lastUsername" />
                         </div>
                         <div class="mb-3">
-                            <label for="Password" class="col-form-label">@(listeningLanding ? "Mật khẩu" : "Password:")</label>
+                            <label for="Password" class="col-form-label">@(listeningLanding ? "Password" : "Password")</label>
                             <input type="password" class="form-control" id="Password" name="Password" />
                         </div>
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" name="RememberMe" id="RememberMeCheck" value="true" />
-                            <label class="form-check-label" for="RememberMeCheck">Ghi nhớ đăng nhập</label>
+                            <label class="form-check-label" for="RememberMeCheck">Remember me</label>
                         </div>
                     
                     </div>
                     <div class="modal-footer">
                         <div class="mt-3">
-                            @(listeningLanding ? "Chưa có tài khoản?" : "Don't have an account?")
-                            <a href="#registerModal" data-bs-toggle="modal" data-bs-target="#registerModal">@(listeningLanding ? "Đăng ký" : "Register")</a>
+                            @(listeningLanding ? "Don't have an account?" : "Don't have an account?")
+                            <a href="#registerModal" data-bs-toggle="modal" data-bs-target="#registerModal">@(listeningLanding ? "Register" : "Register")</a>
                         </div>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@(listeningLanding ? "Đóng" : "Close")</button>
-                        <button type="submit" class="btn btn-primary">@(listeningLanding ? "Đăng nhập" : "Login")</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">@(listeningLanding ? "Close" : "Close")</button>
+                        <button type="submit" class="btn btn-primary">@(listeningLanding ? "Login" : "Login")</button>
                     </div>
                 </form>
             </div>
@@ -118,7 +118,7 @@
         <div class="modal-dialog modal-dialog-scrollable">
             <form id="registerForm" class="modal-content bg-white text-dark" method="post" asp-action="Register" asp-controller="Account">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="registerModalLabel">Đăng ký tài khoản</h5>
+                    <h5 class="modal-title" id="registerModalLabel">Register</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -129,41 +129,41 @@
                         </div>
                     }
                     <div class="mb-3">
-                        <label for="VaiTro" class="form-label fw-semibold">Chọn vai trò đăng ký</label>
+                        <label for="VaiTro" class="form-label fw-semibold">Role</label>
                         <select class="form-select" id="VaiTro" name="VaiTro" aria-describedby="vaiTroDangKyHelp" required>
-                            <option value="Student" selected="@chonSinhVien">Sinh viên</option>
-                            <option value="Instructor" selected="@chonGiangVien">Giảng viên</option>
+                            <option value="Student" selected="@chonSinhVien">Student</option>
+                            <option value="Instructor" selected="@chonGiangVien">Instructor</option>
                         </select>
-                        <div class="form-text" id="vaiTroDangKyHelp">Tài khoản giảng viên cần được quản trị viên phê duyệt.</div>
+                        <div class="form-text" id="vaiTroDangKyHelp">An administrator must approve instructor accounts.</div>
                     </div>
                     <div class="mb-3">
-                        <label for="HoTen" class="col-form-label">Họ và tên:</label>
+                        <label for="HoTen" class="col-form-label">Full Name</label>
                         <input type="text" class="form-control" id="HoTen" name="HoTen" value="@TempData["RegHoTen"]" required />
                     </div>
                     <div class="mb-3">
-                        <label for="Username" class="col-form-label">Tên đăng nhập:</label>
+                        <label for="Username" class="col-form-label">Username</label>
                         <input type="text" class="form-control" id="Username" name="Username" value="@TempData["RegUsername"]" required />
                     </div>
                     <div class="mb-3">
-                        <label for="Email" class="col-form-label">Email:</label>
+                        <label for="Email" class="col-form-label">Email</label>
                         <input type="email" class="form-control" id="Email" name="Email" value="@TempData["RegEmail"]"
                                autocomplete="email" maxlength="150" required />
                     </div>
                     <div class="mb-3">
-                        <label for="RegPassword" class="col-form-label">Mật khẩu:</label>
+                        <label for="RegPassword" class="col-form-label">Password</label>
                         <input type="password" class="form-control" id="RegPassword" name="Password" required />
                     </div>
                     <div class="mb-3">
-                        <label for="ConfirmPassword" class="col-form-label">Xác nhận mật khẩu:</label>
+                        <label for="ConfirmPassword" class="col-form-label">Confirm Password</label>
                         <input type="password" class="form-control" id="ConfirmPassword" name="ConfirmPassword" required />
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal" onclick="huyDangKy()">
-                        <i class="bi bi-x-circle me-1" aria-hidden="true"></i>Hủy
+                        <i class="bi bi-x-circle me-1" aria-hidden="true"></i>Cancel
                     </button>
                     <button type="submit" class="btn btn-primary px-4">
-                        <i class="bi bi-person-plus-fill me-1" aria-hidden="true"></i>Đăng ký
+                        <i class="bi bi-person-plus-fill me-1" aria-hidden="true"></i>Register
                     </button>
                 </div>
             </form>
@@ -177,7 +177,7 @@
                 <div class="modal-content bg-white text-dark shadow border-0">
                     <div class="modal-body text-center p-4 pt-5">
                         <i class="bi bi-hourglass-split text-warning fs-1" aria-hidden="true"></i>
-                        <h2 class="h5 mt-3 mb-2" id="instructorPendingModalLabel">Yêu cầu đang chờ phê duyệt</h2>
+                        <h2 class="h5 mt-3 mb-2" id="instructorPendingModalLabel">Request Pending Approval</h2>
                         <p class="mb-0" id="instructorPendingMessage">@instructorPending</p>
                     </div>
                     <div class="modal-footer justify-content-center border-0 pt-0 pb-4">
@@ -195,7 +195,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2026 - @(listeningLanding ? "EnglishListening" : "EnglishListeningSystem") - <a asp-area="" asp-controller="Home" asp-action="Privacy">@(listeningLanding ? "Quyền riêng tư" : "Privacy")</a>
+            &copy; 2026 - @(listeningLanding ? "EnglishListening" : "EnglishListeningSystem") - <a asp-area="" asp-controller="Home" asp-action="Privacy">@(listeningLanding ? "Privacy" : "Privacy")</a>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

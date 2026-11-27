@@ -1,7 +1,7 @@
 @model EnglishListeningSystem.Models.TaiKhoan
 
 @{
-    ViewData["Title"] = "Thông tin cá nhân";
+    ViewData["Title"] = "Profile";
     if (User.IsInRole("Admin"))
     {
         Layout = "~/Views/Shared/_Layout_Admin.cshtml";
@@ -27,7 +27,7 @@
 }
 
 <div class="account-profile col-12 col-md-8 col-lg-7 mx-auto">
-    <h1 class="display-6 fw-bold mb-4">Tài khoản của tôi</h1>
+    <h1 class="display-6 fw-bold mb-4">My Account</h1>
 
     @if (passwordSuccess != null)
     {
@@ -38,7 +38,7 @@
         <div class="card-body p-3 p-sm-4">
             <div class="d-flex align-items-center gap-3 mb-4">
                 <span class="profile-icon rounded-3"><i class="bi bi-person-vcard" aria-hidden="true"></i></span>
-                <h2 class="h4 fw-semibold mb-0" id="profileInfoTitle">Thông tin cá nhân</h2>
+                <h2 class="h4 fw-semibold mb-0" id="profileInfoTitle">Profile</h2>
             </div>
 
             @if (infoSuccess != null)
@@ -53,23 +53,23 @@
             <form asp-controller="Account" asp-action="CapNhatThongTin" method="post">
                 <div class="profile-details rounded-3 p-3 mb-4">
                     <div class="d-flex flex-wrap align-items-center gap-2">
-                        <span class="small">Vai trò</span>
+                        <span class="small">Role</span>
                         <span class="badge text-bg-primary">@Model.VaiTro</span>
                         @if (User.IsInRole("Student") || User.IsInRole("student"))
                         {
-                            <span class="small ms-sm-2">Điểm tích lũy</span>
+                            <span class="small ms-sm-2">Total Points</span>
                             <span class="badge text-bg-warning">@Model.DiemTichLuy</span>
                         }
                     </div>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label fw-semibold" for="profileFullName">Họ và tên</label>
+                    <label class="form-label fw-semibold" for="profileFullName">Full Name</label>
                     <input type="text" class="form-control" id="profileFullName" name="hoTen" value="@Model.HoTen"
                            autocomplete="name" maxlength="100" required />
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-semibold" for="profileUsername">Tên đăng nhập</label>
+                    <label class="form-label fw-semibold" for="profileUsername">Username</label>
                     <input type="text" class="form-control" id="profileUsername" name="tenDangNhap" value="@Model.TenDangNhap"
                            autocomplete="username" maxlength="50" required />
                 </div>
@@ -77,15 +77,15 @@
                     <label class="form-label fw-semibold" for="profileEmail">Email</label>
                     <input type="email" class="form-control" id="profileEmail" value="@Model.Email"
                            aria-describedby="profileEmailHelp" readonly />
-                    <div class="form-text" id="profileEmailHelp">Email đăng ký là cố định và không thể thay đổi.</div>
+                    <div class="form-text" id="profileEmailHelp">Your account email is fixed.</div>
                 </div>
                 <div class="d-flex flex-wrap gap-2">
                     <button type="submit" class="btn btn-primary px-4">
-                        <i class="bi bi-check-circle me-1" aria-hidden="true"></i>Lưu thông tin cá nhân
+                        <i class="bi bi-check-circle me-1" aria-hidden="true"></i>Save Changes
                     </button>
                     <button type="button" class="btn btn-warning px-4" id="nutDoiMatKhau"
                             data-bs-toggle="modal" data-bs-target="#modalDoiMatKhau">
-                        <i class="bi bi-key-fill me-1" aria-hidden="true"></i>Đổi mật khẩu
+                        <i class="bi bi-key-fill me-1" aria-hidden="true"></i>Change Password
                     </button>
                 </div>
             </form>
@@ -100,9 +100,9 @@
             <div class="modal-header px-3 px-sm-4">
                 <div class="d-flex align-items-center gap-3">
                     <span class="profile-icon rounded-3"><i class="bi bi-shield-lock" aria-hidden="true"></i></span>
-                    <h2 class="modal-title h4 fw-semibold mb-0" id="profilePasswordTitle">Đổi mật khẩu</h2>
+                    <h2 class="modal-title h4 fw-semibold mb-0" id="profilePasswordTitle">Change Password</h2>
                 </div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-3 p-sm-4">
                 @if (passwordError != null)
@@ -111,44 +111,44 @@
                 }
 
                 <div class="mb-3">
-                    <label class="form-label fw-semibold" for="profileCurrentPassword">Mật khẩu hiện tại</label>
+                    <label class="form-label fw-semibold" for="profileCurrentPassword">Current Password</label>
                     <div class="input-group">
                         <input type="password" class="form-control" id="profileCurrentPassword" name="matKhauCu"
                                autocomplete="current-password" required />
                         <button type="button" class="btn btn-outline-secondary" data-password-toggle
-                                aria-controls="profileCurrentPassword" aria-label="Hiện mật khẩu hiện tại" aria-pressed="false">
+                                aria-controls="profileCurrentPassword" aria-label="Show current password" aria-pressed="false">
                             <i class="bi bi-eye" aria-hidden="true"></i>
                         </button>
                     </div>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label fw-semibold" for="profileNewPassword">Mật khẩu mới</label>
+                    <label class="form-label fw-semibold" for="profileNewPassword">New Password</label>
                     <div class="input-group">
                         <input type="password" class="form-control" id="profileNewPassword" name="matKhauMoi"
                                autocomplete="new-password" minlength="6" aria-describedby="profilePasswordHelp" required />
                         <button type="button" class="btn btn-outline-secondary" data-password-toggle
-                                aria-controls="profileNewPassword" aria-label="Hiện mật khẩu mới" aria-pressed="false">
+                                aria-controls="profileNewPassword" aria-label="Show new password" aria-pressed="false">
                             <i class="bi bi-eye" aria-hidden="true"></i>
                         </button>
                     </div>
-                    <div class="form-text" id="profilePasswordHelp">Ít nhất 6 ký tự.</div>
+                    <div class="form-text" id="profilePasswordHelp">Use at least 6 characters.</div>
                 </div>
                 <div>
-                    <label class="form-label fw-semibold" for="profileConfirmPassword">Xác nhận mật khẩu mới</label>
+                    <label class="form-label fw-semibold" for="profileConfirmPassword">Confirm Password</label>
                     <div class="input-group">
                         <input type="password" class="form-control" id="profileConfirmPassword" name="xacNhanMatKhau"
                                autocomplete="new-password" required />
                         <button type="button" class="btn btn-outline-secondary" data-password-toggle
-                                aria-controls="profileConfirmPassword" aria-label="Hiện mật khẩu xác nhận" aria-pressed="false">
+                                aria-controls="profileConfirmPassword" aria-label="Show password confirmation" aria-pressed="false">
                             <i class="bi bi-eye" aria-hidden="true"></i>
                         </button>
                     </div>
                 </div>
             </div>
             <div class="modal-footer px-3 px-sm-4">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="submit" class="btn btn-warning">
-                    <i class="bi bi-key me-1" aria-hidden="true"></i>Xác nhận đổi mật khẩu
+                    <i class="bi bi-key me-1" aria-hidden="true"></i>Change Password
                 </button>
             </div>
         </form>

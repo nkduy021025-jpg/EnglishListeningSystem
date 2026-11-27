@@ -1,5 +1,5 @@
 @{
-    ViewData["Title"] = "Luyện nghe tiếng Anh";
+    ViewData["Title"] = "English Listening Practice";
     ViewData["ListeningLanding"] = true;
     var signedIn = User.Identity?.IsAuthenticated == true;
 }
@@ -11,30 +11,30 @@
 <div class="listening-home">
     <section class="listening-hero" aria-labelledby="listening-title">
         <div class="listening-intro">
-            <p class="listening-label">Luyện nghe tiếng Anh</p>
-            <h1 id="listening-title">Nghe mỗi ngày.<br /><span>Hiểu thêm mỗi ngày.</span></h1>
-            <p class="listening-description">Luyện nghe theo chủ đề, từ những tình huống quen thuộc đến các đoạn hội thoại tiếng Anh trong đời sống.</p>
+            <p class="listening-label">English Listening Practice</p>
+            <h1 id="listening-title">Listen every day.<br /><span>Understand a little more.</span></h1>
+            <p class="listening-description">Practice listening by topic with English conversations from everyday life.</p>
             <div class="listening-actions">
                 @if (signedIn && User.IsInRole("Student"))
                 {
-                    <a class="listening-primary" asp-controller="Student" asp-action="Index">Xem chủ đề <span aria-hidden="true">↗</span></a>
+                    <a class="listening-primary" asp-controller="Student" asp-action="Index">Browse Topics <span aria-hidden="true">↗</span></a>
                 }
                 else if (signedIn && User.IsInRole("Admin"))
                 {
-                    <a class="listening-primary" asp-controller="Admin" asp-action="Index">Trang quản trị <span aria-hidden="true">↗</span></a>
+                    <a class="listening-primary" asp-controller="Admin" asp-action="Index">Admin Dashboard <span aria-hidden="true">↗</span></a>
                 }
                 else if (!signedIn)
                 {
                     <button class="listening-primary" type="button" data-bs-toggle="modal" data-bs-target="#registerModal">
-                        Bắt đầu luyện nghe <span aria-hidden="true">↗</span>
+                        Start Listening <span aria-hidden="true">↗</span>
                     </button>
                 }
-                <a class="listening-secondary" href="#cach-luyen-nghe">Cách luyện nghe <span aria-hidden="true">↓</span></a>
+                <a class="listening-secondary" href="#cach-luyen-nghe">How to Practice <span aria-hidden="true">↓</span></a>
             </div>
         </div>
 
         <figure class="listening-example">
-            <figcaption class="listening-label">Hội thoại mẫu</figcaption>
+            <figcaption class="listening-label">Sample Dialogue</figcaption>
             <div class="listening-wave" aria-hidden="true">
                 @foreach (var height in new[] { 13, 23, 38, 30, 63, 88, 55, 100, 75, 43, 62, 32, 21, 39, 55, 30, 14 })
                 {
@@ -44,24 +44,24 @@
             <blockquote lang="en">
                 <p>“Could you say that again?”</p>
             </blockquote>
-            <p class="listening-translation">Bạn có thể nói lại được không?</p>
+            <p class="listening-translation">Could you repeat that, please?</p>
         </figure>
     </section>
 
     <section class="listening-guide" id="cach-luyen-nghe" aria-labelledby="listening-guide-title">
-        <h2 id="listening-guide-title">Cách luyện nghe</h2>
+        <h2 id="listening-guide-title">How to Practice</h2>
         <ol class="listening-steps">
             <li>
-                <h3>Chọn chủ đề</h3>
-                <p>Bắt đầu với một chủ đề bạn quan tâm hoặc thường gặp trong giao tiếp.</p>
+                <h3>Choose a Topic</h3>
+                <p>Start with a topic that interests you or comes up often in conversation.</p>
             </li>
             <li>
-                <h3>Nghe để nắm ý chính</h3>
-                <p>Ở lượt nghe đầu, thử xác định người nói đang nói về điều gì.</p>
+                <h3>Listen for the Main Idea</h3>
+                <p>On your first listen, try to work out what the speaker is talking about.</p>
             </li>
             <li>
-                <h3>Nghe lại để hiểu chi tiết</h3>
-                <p>Chú ý những từ khóa hoặc cụm từ bạn chưa nghe rõ ở lượt trước.</p>
+                <h3>Listen Again for Details</h3>
+                <p>Focus on words and phrases you missed the first time.</p>
             </li>
         </ol>
     </section>

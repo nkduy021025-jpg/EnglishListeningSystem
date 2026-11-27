@@ -12,8 +12,8 @@ namespace EnglishListeningSystem.Controllers
 {
     public class AccountController : Controller
     {
-        private const string LoiEmailDaSuDung = "Email này đã được sử dụng! Mỗi email chỉ được đăng ký 1 tài khoản.";
-        private const string LoiTenDangNhapDaTonTai = "Tên đăng nhập này đã tồn tại, vui lòng chọn tên khác!";
+        private const string LoiEmailDaSuDung = "This email address is already in use. Each email address can be used for one account.";
+        private const string LoiTenDangNhapDaTonTai = "This username is already taken. Please choose another one.";
 
         private readonly ApplicationDbContext _context;
         private readonly LuuTruYeuCauGiangVien _luuTruYeuCau;
@@ -30,7 +30,7 @@ namespace EnglishListeningSystem.Controllers
         {
             if (!ModelState.IsValid)
             {
-                TempData["LoginError"] = "Vui lòng nhập đầy đủ thông tin đăng nhập";
+                TempData["LoginError"] = "Enter your username or email and your password.";
                 return RedirectToAction("Index", "Home");
             }
             // Có thể đăng nhập bằng email hoặc tên tài khoản.
@@ -48,16 +48,16 @@ namespace EnglishListeningSystem.Controllers
                         || LuuTruYeuCauGiangVien.TrungThongTin(item.Email, tenHoacEmail));
                     if (yeuCau != null)
                     {
-                        TempData["LoginError"] = "Tài khoản giảng viên của bạn đang chờ quản trị viên phê duyệt.";
+                        TempData["LoginError"] = "Your instructor account is awaiting approval from an administrator.";
                     }
                     else
                     {
-                        TempData["LoginError"] = "Tài khoản hoặc mật khẩu không chính xác";
+                        TempData["LoginError"] = "Your username, email, or password is incorrect.";
                     }
                 }
                 catch (IOException)
                 {
-                    TempData["LoginError"] = "Chưa thể kiểm tra trạng thái đăng ký. Vui lòng thử lại.";
+                    TempData["LoginError"] = "We couldn't check your registration status. Please try again.";
                 }
 
                 return RedirectToAction("Index", "Home");
@@ -66,11 +66,11 @@ namespace EnglishListeningSystem.Controllers
             {
                 if (tk.VaiTro == "Instructor")
                 {
-                    TempData["LoginError"] = "Tài khoản giảng viên của bạn đang chờ quản trị viên phê duyệt.";
+                    TempData["LoginError"] = "Your instructor account is awaiting approval from an administrator.";
                 }
                 else
                 {
-                    TempData["LoginError"] = "Tài khoản của bạn đã bị khóa.";
+                    TempData["LoginError"] = "Your account is locked.";
                 }
 
                 TempData["LastUsername"] = model.EmailOrUsername;
@@ -80,7 +80,7 @@ namespace EnglishListeningSystem.Controllers
             PasswordVerificationResult ketQua = _passwordHasher.VerifyHashedPassword(tk, tk.MatKhau, model.Password);
             if (ketQua == PasswordVerificationResult.Failed)
             {
-                TempData["LoginError"] = "Tài khoản hoặc mật khẩu không chính xác";
+                TempData["LoginError"] = "Your username, email, or password is incorrect.";
                 TempData["LastUsername"] = model.EmailOrUsername;
                 return RedirectToAction("Index", "Home");
             }
@@ -133,12 +133,12 @@ namespace EnglishListeningSystem.Controllers
         {
             if (string.IsNullOrWhiteSpace(hoTen))
             {
-                TempData["InfoError"] = "Họ và tên không được để trống!";
+                TempData["InfoError"] = "Enter your full name.";
                 return RedirectToAction(nameof(ThongTinCaNhan));
             }
             else if (string.IsNullOrWhiteSpace(tenDangNhap))
             {
-                TempData["InfoError"] = "Tên đăng nhập không được để trống!";
+                TempData["InfoError"] = "Enter your username.";
                 return RedirectToAction(nameof(ThongTinCaNhan));
             }
 
@@ -146,12 +146,12 @@ namespace EnglishListeningSystem.Controllers
             string tenDangNhapMoi = tenDangNhap.Trim();
             if (hoTen.Length > 100)
             {
-                TempData["InfoError"] = "Họ và tên không được vượt quá 100 ký tự!";
+                TempData["InfoError"] = "Your full name must be 100 characters or fewer.";
                 return RedirectToAction(nameof(ThongTinCaNhan));
             }
             else if (tenDangNhapMoi.Length > 50)
             {
-                TempData["InfoError"] = "Tên đăng nhập không được vượt quá 50 ký tự!";
+                TempData["InfoError"] = "Your username must be 50 characters or fewer.";
                 return RedirectToAction(nameof(ThongTinCaNhan));
             }
 
@@ -185,7 +185,7 @@ namespace EnglishListeningSystem.Controllers
             }
             catch (IOException)
             {
-                TempData["InfoError"] = "Chưa thể kiểm tra tên đăng nhập. Vui lòng thử lại.";
+                TempData["InfoError"] = "We couldn't check whether this username is available. Please try again.";
                 return RedirectToAction(nameof(ThongTinCaNhan));
             }
 
@@ -194,7 +194,7 @@ namespace EnglishListeningSystem.Controllers
             ClaimsPrincipal nguoiDung = TaoNguoiDungDangNhap(tk);
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, nguoiDung, phien.Properties);
 
-            TempData["InfoSuccess"] = "Cập nhật thông tin cá nhân thành công!";
+            TempData["InfoSuccess"] = "Your profile has been updated.";
             return RedirectToAction(nameof(ThongTinCaNhan));
         }
 
@@ -212,28 +212,28 @@ namespace EnglishListeningSystem.Controllers
             if (string.IsNullOrWhiteSpace(matKhauCu) || string.IsNullOrWhiteSpace(matKhauMoi)
                 || string.IsNullOrWhiteSpace(xacNhanMatKhau))
             {
-                TempData["PasswordError"] = "Vui lòng nhập đầy đủ thông tin mật khẩu!";
+                TempData["PasswordError"] = "Complete all password fields.";
                 return RedirectToAction(nameof(ThongTinCaNhan));
             }
 
             PasswordVerificationResult ketQuaKiemTra = _passwordHasher.VerifyHashedPassword(tk, tk.MatKhau, matKhauCu);
             if (ketQuaKiemTra == PasswordVerificationResult.Failed)
             {
-                TempData["PasswordError"] = "Mật khẩu hiện tại không chính xác!";
+                TempData["PasswordError"] = "Your current password is incorrect.";
             }
             else if (matKhauMoi.Length < 6)
             {
-                TempData["PasswordError"] = "Mật khẩu mới phải có ít nhất 6 ký tự!";
+                TempData["PasswordError"] = "Your new password must be at least 6 characters long.";
             }
             else if (matKhauMoi != xacNhanMatKhau)
             {
-                TempData["PasswordError"] = "Mật khẩu mới và xác nhận mật khẩu không khớp!";
+                TempData["PasswordError"] = "Your new password and confirmation don't match.";
             }
             else
             {
                 tk.MatKhau = _passwordHasher.HashPassword(tk, matKhauMoi);
                 await _context.SaveChangesAsync();
-                TempData["PasswordSuccess"] = "Đổi mật khẩu thành công!";
+                TempData["PasswordSuccess"] = "Your password has been changed.";
             }
 
             return RedirectToAction(nameof(ThongTinCaNhan));
@@ -278,27 +278,27 @@ namespace EnglishListeningSystem.Controllers
 
             if (emailNhap.Length == 0)
             {
-                TempData["RegisterError"] = "Vui lòng nhập email";
+                TempData["RegisterError"] = "Enter your email address.";
                 return RedirectToAction("Index", "Home");
             }
 
             if (!string.IsNullOrEmpty(model.Password) && !string.IsNullOrEmpty(model.ConfirmPassword)
                 && model.Password != model.ConfirmPassword)
             {
-                TempData["RegisterError"] = "Mật khẩu xác nhận không khớp";
+                TempData["RegisterError"] = "Your passwords don't match.";
                 return RedirectToAction("Index", "Home");
             }
 
             if (!ModelState.IsValid)
             {
-                TempData["RegisterError"] = "Vui lòng kiểm tra lại thông tin đăng ký";
+                TempData["RegisterError"] = "Check your registration details and try again.";
                 return RedirectToAction("Index", "Home");
             }
 
             // Form đăng ký chỉ nhận hai vai trò này, kể cả khi gửi POST trực tiếp.
             if (model.VaiTro != "Student" && model.VaiTro != "Instructor")
             {
-                TempData["RegisterError"] = "Vai trò đăng ký không hợp lệ";
+                TempData["RegisterError"] = "Select a valid role.";
                 return RedirectToAction("Index", "Home");
             }
 
@@ -310,7 +310,7 @@ namespace EnglishListeningSystem.Controllers
             }
             catch (IOException)
             {
-                TempData["RegisterError"] = "Chưa thể xử lý yêu cầu đăng ký. Vui lòng thử lại.";
+                TempData["RegisterError"] = "We couldn't process your registration. Please try again.";
                 return RedirectToAction("Index", "Home");
             }
         }
@@ -384,14 +384,14 @@ namespace EnglishListeningSystem.Controllers
             if (tk.VaiTro == "Student")
             {
                 TempData.Remove("InstructorPending");
-                TempData["RegisterSuccess"] = "Đăng ký thành công! Vui lòng đăng nhập.";
+                TempData["RegisterSuccess"] = "Your account is ready. Please log in.";
                 TempData["LastUsername"] = tk.TenDangNhap;
             }
             else
             {
                 TempData.Remove("RegisterSuccess");
                 TempData.Remove("LastUsername");
-                TempData["InstructorPending"] = "Vui lòng đợi, quản trị viên sẽ sớm phê duyệt yêu cầu của bạn.";
+                TempData["InstructorPending"] = "Please wait, an administrator will review and approve your request shortly.";
             }
 
             return RedirectToAction("Index", "Home");
@@ -408,11 +408,11 @@ namespace EnglishListeningSystem.Controllers
             }
             else if (await TrungTenDangNhapAsync(tenDangNhap))
             {
-                return "Tên đăng nhập này đã được sử dụng!";
+                return "This username is already taken. Please choose another one.";
             }
             else if (dsChoDuyet.Exists(item => LuuTruYeuCauGiangVien.TrungThongTin(item.TenDangNhap, tenDangNhap)))
             {
-                return "Tên đăng nhập này đã có trong yêu cầu giảng viên đang chờ phê duyệt!";
+                return "This username is already associated with a pending instructor request.";
             }
 
             return null;

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -13,13 +13,13 @@
 </head>
 <body class="student-shell">
     <header class="student-header">
-        <nav class="container d-flex flex-wrap align-items-center gap-2 gap-sm-4 py-3" aria-label="Điều hướng học viên">
+        <nav class="container d-flex flex-wrap align-items-center gap-2 gap-sm-4 py-3" aria-label="Student navigation">
             <a class="student-brand" asp-controller="Home" asp-action="Index">EnglishListeningSystem</a>
             @if (User.Identity?.IsAuthenticated == true)
             {
                 <div class="d-flex flex-wrap align-items-center gap-2 ms-auto">
                     <partial name="_RoleNavigation" />
-                    <button class="student-logout" type="button" data-bs-toggle="modal" data-bs-target="#logoutModal">Đăng xuất</button>
+                    <button class="student-logout" type="button" data-bs-toggle="modal" data-bs-target="#logoutModal">Logout</button>
                 </div>
             }
         </nav>
@@ -32,7 +32,7 @@
     <footer class="student-footer">
         <div class="container d-flex flex-wrap gap-2 py-3">
             <span>&copy; 2026 EnglishListening</span>
-            <a asp-controller="Home" asp-action="Privacy">Quyền riêng tư</a>
+            <a asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
 

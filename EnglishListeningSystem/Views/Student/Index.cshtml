@@ -1,21 +1,21 @@
 @model IEnumerable<DanhMuc>
 
 @{
-    ViewData["Title"] = "Chủ đề luyện nghe";
+    ViewData["Title"] = "Listening Topics";
 }
 
-<nav aria-label="Đường dẫn">
+<nav aria-label="Breadcrumb">
     <ol class="breadcrumb student-breadcrumb">
-        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Bài học</li>
+        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Listening Topics</li>
     </ol>
 </nav>
 
-<h1 class="student-title">Chủ đề luyện nghe</h1>
+<h1 class="student-title">Listening Topics</h1>
 
 @if (!Model.Any())
 {
-    <p class="student-empty">Chưa có chủ đề luyện nghe.</p>
+    <p class="student-empty">There are no listening topics yet.</p>
 }
 else
 {
@@ -33,9 +33,9 @@ else
                                 </a>
                             </h2>
                             <p class="topic-description">
-                                @(string.IsNullOrWhiteSpace(topic.MoTa) ? "Luyện nghe tiếng Anh" : topic.MoTa)
+                                @(string.IsNullOrWhiteSpace(topic.MoTa) ? "English listening practice" : topic.MoTa)
                             </p>
-                            <p class="topic-count">@topic.BaiHocs.Count bài học</p>
+                            <p class="topic-count">Lessons: @topic.BaiHocs.Count</p>
                         </div>
                     </div>
                 </article>
