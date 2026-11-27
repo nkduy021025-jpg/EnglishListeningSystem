@@ -237,10 +237,6 @@ namespace EnglishListeningSystem.Models
                     .OnDelete(DeleteBehavior.SetNull)
                     .HasConstraintName("FK_TuVung_BaiHoc");
             });
-
-            OnModelCreatingPartial(modelBuilder);
         }
-
-        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
 }

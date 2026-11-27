@@ -30,7 +30,7 @@ namespace EnglishListeningSystem.Models
                 return null;
             }
 
-            string duongDan = Path.Combine(_thuMucAudio, tenFile);
+            string duongDan = Path.Combine(_thuMucAudio, tenFile); 
             return LaFileThuong(duongDan) ? duongDan : null;
         }
 
@@ -46,7 +46,7 @@ namespace EnglishListeningSystem.Models
             return LaFileThuong(duongDan) ? duongDan : null;
         }
 
-        public async Task<(string TenFile, List<CauChep>? CacCau)> LuuTepAsync(
+        public async Task<(string TenFile, List<CauChep> CacCau)> LuuTepAsync(
             IFormFile? audioFile, IFormFile? srtFile, string? tenAudioHienTai, CancellationToken huy)
         {
             KiemTraTep(audioFile, ".mp3", GioiHanMp3, "Choose an MP3 file up to 50 MB.");
@@ -71,13 +71,26 @@ namespace EnglishListeningSystem.Models
                 throw new IOException("The audio directory must be a regular directory.");
             }
 
-            // Dùng tên do máy chủ sinh, không dùng tên hoặc đường dẫn từ yêu cầu.
-            string tenFile = Guid.NewGuid().ToString("N") + ".mp3";
+            // Thêm mã riêng để tránh ghi đè khi tải các tệp trùng tên.
+            string tenFile = Guid.NewGuid().ToString("N");
+            if (audioFile != null)
+            {
+                string tenGoc = Path.GetFileNameWithoutExtension(audioFile.FileName.Replace('\\', '/')).Trim();
+                if (tenGoc.Length > 0 && tenGoc.Length <= 60
+                    && tenGoc.IndexOfAny(Path.GetInvalidFileNameChars()) < 0
+                    && tenGoc.IndexOfAny(['<', '>', ':', '"', '|', '?', '*']) < 0
+                    && !tenGoc.Any(char.IsControl))
+                {
+                    tenFile += "-" + tenGoc;
+                }
+            }
+            tenFile += ".mp3";
             string duongDanAudio = Path.Combine(_thuMucAudio, tenFile);
+            // Lưu phụ đề cùng tên gốc với MP3 để trang Student tìm được theo cặp.
             string duongDanSrt = Path.ChangeExtension(duongDanAudio, ".srt");
             try
             {
-                List<CauChep>? cacCau = null;
+                List<CauChep> cacCau;
                 if (srtFile != null)
                 {
                     using (FileStream file = new FileStream(duongDanSrt, FileMode.CreateNew))
@@ -85,6 +98,10 @@ namespace EnglishListeningSystem.Models
                         await srtFile.CopyToAsync(file, huy);
                     }
                     cacCau = DocFileSrt(duongDanSrt);
+                }
+                else
+                {
+                    cacCau = new List<CauChep>();
                 }
 
                 using Stream nguonAudio = audioFile == null ? File.OpenRead(audioHienTai!) : audioFile.OpenReadStream();

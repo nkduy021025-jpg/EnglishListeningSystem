@@ -262,20 +262,15 @@
                         <input class="form-control" id="them-cap-do" name="CapDo" list="goi-y-cap-do" maxlength="50" required />
                     </div>
                 </div>
-                <div>
-                    <label class="form-label" for="them-audio-file">MP3 Audio (optional)</label>
-                    <input class="form-control" type="file" id="them-audio-file" name="audioFile" accept=".mp3" />
+                <div class="mb-3">
+                    <label class="form-label" for="them-audio-file">MP3 Audio</label>
+                    <input class="form-control" type="file" id="them-audio-file" name="audioFile" accept=".mp3" required />
                     <div class="form-text">Up to 50 MB.</div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label" for="them-srt-file">SRT Subtitles (optional)</label>
-                    <input class="form-control" type="file" id="them-srt-file" name="srtFile" accept=".srt" />
-                    <div class="form-text">Up to 1 MB. Choose an MP3 upload or enter an existing file name below.</div>
-                </div>
                 <div>
-                    <label class="form-label" for="them-audio">Existing MP3 File Name (optional)</label>
-                    <input class="form-control" id="them-audio" name="AudioUrl" maxlength="255" />
-                    <div class="form-text">Use the file name only, such as lesson1.mp3.</div>
+                    <label class="form-label" for="them-srt-file">SRT Subtitles</label>
+                    <input class="form-control" type="file" id="them-srt-file" name="srtFile" accept=".srt" required />
+                    <div class="form-text">Up to 1 MB.</div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -315,20 +310,16 @@
                         <input class="form-control" id="sua-cap-do" name="CapDo" list="goi-y-cap-do" maxlength="50" required />
                     </div>
                 </div>
-                <div>
+                <div class="mb-3">
                     <label class="form-label" for="sua-audio-file">New MP3 Audio (optional)</label>
                     <input class="form-control" type="file" id="sua-audio-file" name="audioFile" accept=".mp3" />
                     <div class="form-text">Up to 50 MB. Current audio: <span class="text-break" id="sua-audio-hien-tai"></span></div>
+                    <div class="form-text">Leave this field blank to keep the current audio.</div>
                 </div>
-                <div class="mb-3">
+                <div>
                     <label class="form-label" for="sua-srt-file">New SRT Subtitles (optional)</label>
                     <input class="form-control" type="file" id="sua-srt-file" name="srtFile" accept=".srt" />
                     <div class="form-text">Up to 1 MB. Subtitles can be replaced before students attempt the lesson.</div>
-                </div>
-                <div>
-                    <label class="form-label" for="sua-audio">Existing MP3 File Name (optional)</label>
-                    <input class="form-control" id="sua-audio" name="AudioUrl" maxlength="255" />
-                    <div class="form-text">Leave the audio fields blank to keep the current MP3.</div>
                 </div>
             </div>
             <div class="modal-footer">

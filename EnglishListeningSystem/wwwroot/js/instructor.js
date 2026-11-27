@@ -14,7 +14,6 @@
         document.getElementById("sua-chu-de").value = nutSua.dataset.chuDe;
         document.getElementById("sua-cap-do").value = nutSua.dataset.capDo;
         document.getElementById("sua-audio-hien-tai").textContent = nutSua.dataset.audio || "None";
-        document.getElementById("sua-audio").value = "";
         document.getElementById("sua-audio-file").value = "";
         document.getElementById("sua-srt-file").value = "";
     }

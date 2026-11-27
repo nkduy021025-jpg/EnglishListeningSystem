@@ -58,9 +58,15 @@ namespace EnglishListeningSystem.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RequestSizeLimit(KhoAmThanhBaiHoc.GioiHanYeuCau)]
-        public async Task<IActionResult> ThemBaiHoc([Bind("TenBH,MaDM,CapDo,AudioUrl")] BaiHoc model,
+        public async Task<IActionResult> ThemBaiHoc([Bind("TenBH,MaDM,CapDo")] BaiHoc model,
             IFormFile? audioFile, IFormFile? srtFile)
         {
+            if (audioFile == null || srtFile == null)
+            {
+                TempData["ErrorMessage"] = "Choose both an MP3 audio file and an SRT subtitle file.";
+                return RedirectToAction(nameof(Index));
+            }
+
             string? loi = await KiemTraBaiHoc(model);
             if (loi != null)
             {
@@ -81,19 +87,12 @@ namespace EnglishListeningSystem.Controllers
             bool dangCommit = false;
             try
             {
-                string? tenFile = KiemTraTenTep(model.AudioUrl, audioFile);
-                if (audioFile != null || srtFile != null)
-                {
-                    (fileDaTai, List<CauChep>? cacCau) = await _khoAmThanh.LuuTepAsync(
-                        audioFile, srtFile, tenFile, HttpContext.RequestAborted);
-                    tenFile = fileDaTai;
-                    if (cacCau != null)
-                    {
-                        baiHoc.CauCheps = cacCau;
-                    }
-                }
+                (fileDaTai, List<CauChep> cacCau) = await _khoAmThanh.LuuTepAsync(
+                    audioFile, srtFile, null, HttpContext.RequestAborted);
+                baiHoc.AudioUrl = fileDaTai;
+                baiHoc.CauCheps = cacCau;
 
-                baiHoc.AudioUrl = tenFile;
+                // Lưu bài học cùng các câu chép đọc từ phụ đề.
                 await using IDbContextTransaction giaoDich = await _context.Database.BeginTransactionAsync();
                 _context.BaiHocs.Add(baiHoc);
                 await _context.SaveChangesAsync();
@@ -127,7 +126,7 @@ namespace EnglishListeningSystem.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [RequestSizeLimit(KhoAmThanhBaiHoc.GioiHanYeuCau)]
-        public async Task<IActionResult> SuaBaiHoc([Bind("MaBH,TenBH,MaDM,CapDo,AudioUrl")] BaiHoc model,
+        public async Task<IActionResult> SuaBaiHoc([Bind("MaBH,TenBH,MaDM,CapDo")] BaiHoc model,
             IFormFile? audioFile, IFormFile? srtFile)
         {
             string? loi = await KiemTraBaiHoc(model);
@@ -149,14 +148,12 @@ namespace EnglishListeningSystem.Controllers
             bool dangCommit = false;
             try
             {
-                string? tenFile = KiemTraTenTep(model.AudioUrl, audioFile);
-                bool dungAudioHienTai = audioFile == null && srtFile != null && tenFile == null;
-                List<CauChep>? cacCau = null;
+                bool dungAudioHienTai = audioFile == null && srtFile != null;
+                List<CauChep> cacCau = new List<CauChep>();
                 if (audioFile != null || srtFile != null)
                 {
                     (fileDaTai, cacCau) = await _khoAmThanh.LuuTepAsync(audioFile, srtFile,
-                        tenFile ?? baiHocHienTai.AudioUrl, HttpContext.RequestAborted);
-                    tenFile = fileDaTai;
+                        baiHocHienTai.AudioUrl, HttpContext.RequestAborted);
                 }
 
                 await using IDbContextTransaction giaoDich =
@@ -170,7 +167,7 @@ namespace EnglishListeningSystem.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                if (cacCau != null)
+                if (cacCau.Count > 0)
                 {
                     // Không thay phụ đề sau khi học viên đã làm bài.
                     IQueryable<CauChep> cauHoiCu = _context.CauCheps.Where(cau => cau.MaBH == baiHoc.MaBH);
@@ -194,9 +191,9 @@ namespace EnglishListeningSystem.Controllers
                 baiHoc.TenBH = model.TenBH.Trim();
                 baiHoc.MaDM = model.MaDM;
                 baiHoc.CapDo = model.CapDo.Trim();
-                if (tenFile != null)
+                if (fileDaTai != null)
                 {
-                    baiHoc.AudioUrl = tenFile;
+                    baiHoc.AudioUrl = fileDaTai;
                 }
                 await _context.SaveChangesAsync();
                 dangCommit = true;
@@ -363,21 +360,6 @@ namespace EnglishListeningSystem.Controllers
             }
 
             return null;
-        }
-
-        private string? KiemTraTenTep(string? tenFile, IFormFile? audioFile)
-        {
-            if (audioFile != null || string.IsNullOrWhiteSpace(tenFile))
-            {
-                return null;
-            }
-
-            tenFile = tenFile.Trim();
-            if (_khoAmThanh.TimFileMp3(tenFile) == null)
-            {
-                throw new InvalidDataException("Enter the name of an MP3 file already in the audio folder.");
-            }
-            return tenFile;
         }
     }
 }
